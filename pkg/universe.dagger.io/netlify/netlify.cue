@@ -93,9 +93,9 @@ import (
 		}
 
 		export: files: {
-			"/netlify/url":       _
-			"/netlify/deployUrl": _
-			"/netlify/logsUrl":   _
+			"/netlify/url":       string
+			"/netlify/deployUrl": string
+			"/netlify/logsUrl":   string
 		}
 	}
 

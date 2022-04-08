@@ -92,17 +92,22 @@ func (r *Runner) initTasks() {
 	for _, t := range flow.Tasks() {
 		if cuePathHasPrefix(t.Path(), r.target) {
 			r.addTask(t)
+			fmt.Println("adding task", t.Path().String())
 		}
 	}
 
 	// If a `client` task is targeting an allowed task, allow the output task as well
 	for _, t := range flow.Tasks() {
 		if t.Path().Selectors()[0] != ClientSelector {
+			fmt.Println("skipping task", t.Path().String())
 			continue
 		}
+		fmt.Println("adding dependencies of client task", t.Path().String())
 		for _, dep := range t.Dependencies() {
+			fmt.Println("	checking dependency", dep.Path().String())
 			if r.shouldRun(dep.Path()) {
 				r.addTask(t)
+				fmt.Println("adding task", t.Path().String())
 			}
 		}
 	}
@@ -239,6 +244,7 @@ func cuePathHasPrefix(p cue.Path, prefix cue.Path) bool {
 }
 
 func noOpRunner(flowVal cue.Value) (cueflow.Runner, error) {
+	fmt.Println("Checking path", flowVal.Path().String())
 	v := compiler.Wrap(flowVal)
 	_, err := task.Lookup(v)
 	if err != nil {
@@ -248,6 +254,7 @@ func noOpRunner(flowVal cue.Value) (cueflow.Runner, error) {
 		}
 		return nil, err
 	}
+	fmt.Println("  found task!!", err == nil)
 
 	// Return a no op runner
 	return cueflow.RunnerFunc(func(t *cueflow.Task) error {

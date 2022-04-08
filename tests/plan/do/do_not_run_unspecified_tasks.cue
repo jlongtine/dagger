@@ -19,7 +19,7 @@ dagger.#Plan & {
 		test: {
 			one: bash.#Run & {
 				input: image.output
-				script: contents: "echo Hello World! > /output.txt"
+				script: contents: "echo Hello Joel! > /output.txt"
 				export: files: "/output.txt": string
 			}
 
