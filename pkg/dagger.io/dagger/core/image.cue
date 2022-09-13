@@ -73,22 +73,22 @@ import (
 	// Authentication
 	// You can alternatively set DOCKERHUB_AUTH_USER and DOCKERHUB_AUTH_PASSWORD env vars on your host
 	// However, these global env vars only work for the "docker.io" registry
-	auth?: {
-		username: string
-		secret:   dagger.#Secret
-	}
+	// auth?: {
+	// 	username: string
+	// 	secret:   dagger.#Secret
+	// }
 
 	// When to pull the image
-	resolveMode: *"default" | "forcePull" | "preferLocal"
+	// resolveMode: *"default" | "forcePull" | "preferLocal"
 
 	// Root filesystem of downloaded image
 	output: dagger.#FS @dagger(generated)
 
 	// Image digest
-	digest: string @dagger(generated)
+	// digest: string @dagger(generated)
 
 	// Downloaded container image config
-	config: #ImageConfig @dagger(generated)
+	// config: #ImageConfig @dagger(generated)
 }
 
 // Build a container image using a Dockerfile
