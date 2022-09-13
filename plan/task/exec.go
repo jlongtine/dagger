@@ -9,10 +9,15 @@ import (
 	"os"
 	"strings"
 
+	"cuelang.org/go/cue"
+	"github.com/dagger/cloak/engine"
+	"github.com/dagger/cloak/sdk/go/dagger"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/solver/pb"
 	"go.dagger.io/dagger/compiler"
+	"go.dagger.io/dagger/gen/core"
+	"go.dagger.io/dagger/pkg"
 	"go.dagger.io/dagger/plancontext"
 	"go.dagger.io/dagger/solver"
 )
@@ -24,72 +29,120 @@ func init() {
 type execTask struct {
 }
 
-func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	common, err := parseCommon(pctx, v)
 	if err != nil {
 		return nil, err
 	}
-	opts, err := common.runOpts()
-	if err != nil {
-		return nil, err
-	}
+	// fmt.Println("dude...")
+	// return compiler.NewValue(), nil
+	// opts, err := common.runOpts()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// env
+	envInput := []core.ExecEnvInput{}
+	secretEnvInput := []core.ExecSecretEnvInput{}
 	envs, err := v.Lookup("env").Fields()
 	if err != nil {
 		return nil, err
 	}
 	for _, env := range envs {
 		if plancontext.IsSecretValue(env.Value) {
-			secret, err := pctx.Secrets.FromValue(env.Value)
+			secretIDPath := cue.MakePath(
+				cue.Str("$dagger"),
+				cue.Str("secret"),
+				cue.Hid("_id", pkg.DaggerPackage),
+			)
+
+			id, err := v.LookupPath(secretIDPath).String()
+
 			if err != nil {
 				return nil, err
 			}
-			opts = append(opts, llb.AddSecret(env.Label(), llb.SecretID(secret.ID()), llb.SecretAsEnv(true)))
+			secretEnvInput = append(secretEnvInput, core.ExecSecretEnvInput{
+				Name: env.Label(),
+				Id:   dagger.SecretID(id),
+			})
 		} else {
 			s, err := env.Value.String()
 			if err != nil {
 				return nil, err
 			}
-			opts = append(opts, llb.AddEnv(env.Label(), s))
+			envInput = append(envInput, core.ExecEnvInput{
+				Name:  env.Label(),
+				Value: s,
+			})
 		}
 	}
 
 	// always run
-	always, err := v.Lookup("always").Bool()
-	if err != nil {
-		return nil, err
-	}
-	if always {
-		opts = append(opts, llb.IgnoreCache)
-	}
+	// always, err := v.Lookup("always").Bool()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if always {
+	// 	opts = append(opts, llb.IgnoreCache)
+	// }
 
 	// marker for status events
 	// FIXME
-	args := make([]string, 0, len(common.args))
-	for _, a := range common.args {
-		args = append(args, fmt.Sprintf("%q", a))
-	}
-	opts = append(opts, withCustomName(v, "Exec [%s]", strings.Join(args, ", ")))
+	fmt.Println("common.FSID:", common.FSID)
 
-	st, err := common.root.State()
+	// args := make([]string, 0, len(common.args))
+	// for _, a := range common.args {
+	// 	args = append(args, fmt.Sprintf("%q", a))
+	// }
+	resp, err := core.Exec(ectx, dagger.FSID(common.FSID), core.ExecInput{
+		Args:      common.args,
+		Workdir:   common.workdir,
+		Env:       envInput,
+		SecretEnv: secretEnvInput,
+	})
+
+	fsid := resp.Core.Filesystem.ID
+	fmt.Println("exec fs ID:", fsid)
+	fmt.Println(resp.Core.Filesystem.ID)
+	val := compiler.NewValue()
+
+	fmt.Println()
+	err = val.FillPath(cue.MakePath(
+		cue.Str("output"),
+		cue.Str("$dagger"),
+		cue.Str("fs"),
+		cue.Hid("_id", pkg.DaggerPackage),
+	), fsid)
+
 	if err != nil {
-		return nil, err
+		return val, err
 	}
-	st = st.Run(opts...).Root()
+
+	fmt.Println("exit code:", &resp.Core.Filesystem.Exec.ExitCode)
+
+	err = val.FillPath(cue.ParsePath("exit"), &resp.Core.Filesystem.Exec.ExitCode)
+
+	return val, err
+	// opts = append(opts, withCustomName(v, "Exec [%s]", strings.Join(args, ", ")))
+
+	// st, err := common.root.State()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// st = st.Run(opts...).Root()
 
 	// Solve
-	result, err := s.Solve(ctx, st, pctx.Platform.Get())
-	if err != nil {
-		return nil, err
-	}
+	// result, err := s.Solve(ctx, st, pctx.Platform.Get())
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// Fill result
-	resultFS := pctx.FS.New(result)
-	return compiler.NewValue().FillFields(map[string]interface{}{
-		"output": resultFS.MarshalCUE(),
-		"exit":   0,
-	})
+	// resultFS := pctx.FS.New(result)
+	// return compiler.NewValue().FillFields(map[string]interface{}{
+	// 	"output": resultFS.MarshalCUE(),
+	// 	"exit":   0,
+	// })
 }
 
 func parseCommon(pctx *plancontext.Context, v *compiler.Value) (*execCommon, error) {
@@ -98,11 +151,22 @@ func parseCommon(pctx *plancontext.Context, v *compiler.Value) (*execCommon, err
 	}
 
 	// root
-	input, err := pctx.FS.FromValue(v.Lookup("input"))
+	// input, err := pctx.FS.FromValue(v.Lookup("input"))
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// e.root = input
+	fsid, err := v.LookupPath(cue.MakePath(
+		cue.Str("input"),
+		cue.Str("$dagger"),
+		cue.Str("fs"),
+		cue.Hid("_id", pkg.DaggerPackage),
+	)).String()
+	e.FSID = fsid
+
 	if err != nil {
 		return nil, err
 	}
-	e.root = input
 
 	// args
 	var cmd struct {
@@ -161,6 +225,7 @@ func parseCommon(pctx *plancontext.Context, v *compiler.Value) (*execCommon, err
 
 // fields that are common between sync and async execs
 type execCommon struct {
+	FSID    string
 	root    *plancontext.FS
 	args    []string
 	workdir string

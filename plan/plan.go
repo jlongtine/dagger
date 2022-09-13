@@ -11,6 +11,7 @@ import (
 
 	"cuelang.org/go/cue"
 	cueflow "cuelang.org/go/tools/flow"
+	"github.com/dagger/cloak/engine"
 	"github.com/rs/zerolog/log"
 	"go.dagger.io/dagger/compiler"
 	"go.dagger.io/dagger/pkg"
@@ -218,13 +219,19 @@ func (p *Plan) Do(ctx context.Context, path cue.Path, s *solver.Solver) error {
 	ctx, span := otel.Tracer("dagger").Start(ctx, "plan.Do")
 	defer span.End()
 
-	r := NewRunner(p.context, path, s, p.config.DryRun)
-	final, err := r.Run(ctx, p.source)
-	if err != nil {
-		return err
-	}
+	if err := engine.Start(ctx, &engine.Config{}, func(ctx engine.Context) error {
+		r := NewRunner(p.context, path, s, p.config.DryRun)
+		r.ectx = &ctx
+		final, err := r.Run(ctx, p.source)
+		if err != nil {
+			return err
+		}
 
-	p.final = final
+		p.final = final
+		return nil
+	}); err != nil {
+		panic(err)
+	}
 
 	return nil
 }
