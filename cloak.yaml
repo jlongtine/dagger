@@ -1,0 +1,4 @@
+name: dagger-classic
+scripts:
+  - path: .
+    sdk: go
