@@ -82,9 +82,6 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	// if err != nil {
 	// 	return nil, err
 	// }
-	// if always {
-	// 	opts = append(opts, llb.IgnoreCache)
-	// }
 
 	// marker for status events
 	// FIXME
