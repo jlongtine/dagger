@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	Register("Copy", func() Task { return &copyTask{} })
+	// Register("Copy", func() Task { return &copyTask{} })
 }
 
 type copyTask struct {

@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	Register("GitPull", func() Task { return &gitPullTask{} })
+	// Register("GitPull", func() Task { return &gitPullTask{} })
 }
 
 type gitPullTask struct {

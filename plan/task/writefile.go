@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	Register("WriteFile", func() Task { return &writeFileTask{} })
+	// Register("WriteFile", func() Task { return &writeFileTask{} })
 }
 
 type writeFileTask struct {

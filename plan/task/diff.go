@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	Register("Diff", func() Task { return &diffTask{} })
+	// Register("Diff", func() Task { return &diffTask{} })
 }
 
 type diffTask struct {

@@ -15,7 +15,7 @@ import (
 )
 
 func init() {
-	Register("HTTPFetch", func() Task { return &httpFetchTask{} })
+	// Register("HTTPFetch", func() Task { return &httpFetchTask{} })
 }
 
 type httpFetchTask struct {

@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Register("Nop", func() Task { return &nopTask{} })
+	// Register("Nop", func() Task { return &nopTask{} })
 }
 
 type nopTask struct {

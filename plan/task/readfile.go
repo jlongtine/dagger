@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	Register("ReadFile", func() Task { return &readFileTask{} })
+	// Register("ReadFile", func() Task { return &readFileTask{} })
 }
 
 type readFileTask struct {

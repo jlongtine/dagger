@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	Register("Push", func() Task { return &pushTask{} })
+	// Register("Push", func() Task { return &pushTask{} })
 }
 
 type pushTask struct {
