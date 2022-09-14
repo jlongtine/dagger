@@ -101,26 +101,34 @@ import (
 	dockerfile: *{
 		path: string | *"Dockerfile"
 	} | {
-		contents: string
+		contents: string @cloak(notimplemented)
 	}
 
 	// Authentication
-	auth: [registry=string]: {
-		username: string
-		secret:   dagger.#Secret
+	auth: {
+		[registry=string]: {
+			username: string
+			secret:   dagger.#Secret
+		} @cloak(notimplemented)
 	}
 
-	platforms?: [...string]
-	target?: string
-	buildArg?: [string]: string
-	label?: [string]:    string
-	hosts?: [string]:    string
+	platforms?: [...string] @cloak(notimplemented)
+	target?: string @cloak(notimplemented)
+	buildArg?: {
+		[string]: string @cloak(notimplemented)
+	}
+	label?: {
+		[string]: string @cloak(notimplemented)
+	}
+	hosts?: {
+		[string]: string @cloak(notimplemented)
+	}
 
 	// Root filesystem produced
 	output: dagger.#FS @dagger(generated)
 
 	// Container image config produced
-	config: #ImageConfig @dagger(generated)
+	config: #ImageConfig @dagger(generated) @cloak(notimplemented)
 }
 
 // Export an image as a tar archive

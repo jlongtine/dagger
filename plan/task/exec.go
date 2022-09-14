@@ -9,15 +9,14 @@ import (
 	"os"
 	"strings"
 
-	"cuelang.org/go/cue"
 	"github.com/dagger/cloak/engine"
 	"github.com/dagger/cloak/sdk/go/dagger"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/solver/pb"
+	"go.dagger.io/dagger/cloak/utils"
 	"go.dagger.io/dagger/compiler"
 	"go.dagger.io/dagger/gen/core"
-	"go.dagger.io/dagger/pkg"
 	"go.dagger.io/dagger/plancontext"
 	"go.dagger.io/dagger/solver"
 )
@@ -50,20 +49,14 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	}
 	for _, env := range envs {
 		if plancontext.IsSecretValue(env.Value) {
-			secretIDPath := cue.MakePath(
-				cue.Str("$dagger"),
-				cue.Str("secret"),
-				cue.Hid("_id", pkg.DaggerPackage),
-			)
-
-			id, err := v.LookupPath(secretIDPath).String()
+			id, err := utils.GetSecretId(env.Value)
 
 			if err != nil {
 				return nil, err
 			}
 			secretEnvInput = append(secretEnvInput, core.ExecSecretEnvInput{
 				Name: env.Label(),
-				Id:   dagger.SecretID(id),
+				Id:   id,
 			})
 		} else {
 			s, err := env.Value.String()
@@ -85,41 +78,60 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 
 	// marker for status events
 	// FIXME
-	fmt.Println("common.FSID:", common.FSID)
 
 	// args := make([]string, 0, len(common.args))
 	// for _, a := range common.args {
 	// 	args = append(args, fmt.Sprintf("%q", a))
 	// }
-	resp, err := core.Exec(ectx, dagger.FSID(common.FSID), core.ExecInput{
-		Args:      common.args,
-		Workdir:   common.workdir,
-		Env:       envInput,
-		SecretEnv: secretEnvInput,
+
+	mounts := []core.MountInput{}
+
+	cacheMounts := []core.CacheMountInput{}
+
+	for _, m := range common.mounts {
+		switch {
+		case m.cacheMount != nil:
+			var sharingMode string
+			switch m.cacheMount.concurrency {
+			case llb.CacheMountShared:
+				sharingMode = "shared"
+			case llb.CacheMountPrivate:
+				sharingMode = "private"
+			case llb.CacheMountLocked:
+				sharingMode = "locked"
+			}
+
+			cacheMounts = append(cacheMounts, core.CacheMountInput{
+				Name:        m.cacheMount.id,
+				SharingMode: sharingMode,
+				Path:        m.dest,
+			})
+		// case m.tmpMount != nil:
+		case m.fsMount != nil:
+			mounts = append(mounts, core.MountInput{
+				Fs:   m.fsMount.fsid,
+				Path: m.dest,
+			})
+		// case m.secretMount != nil:
+		// case m.fileMount != nil:
+		default:
+		}
+	}
+	resp, err := core.Exec(ectx, common.FSID, core.ExecInput{
+		Args:        common.args,
+		Workdir:     common.workdir,
+		Env:         envInput,
+		SecretEnv:   secretEnvInput,
+		Mounts:      mounts,
+		CacheMounts: cacheMounts,
 	})
 
 	fsid := resp.Core.Filesystem.ID
-	fmt.Println("exec fs ID:", fsid)
-	fmt.Println(resp.Core.Filesystem.ID)
-	val := compiler.NewValue()
 
-	fmt.Println()
-	err = val.FillPath(cue.MakePath(
-		cue.Str("output"),
-		cue.Str("$dagger"),
-		cue.Str("fs"),
-		cue.Hid("_id", pkg.DaggerPackage),
-	), fsid)
-
-	if err != nil {
-		return val, err
-	}
-
-	fmt.Println("exit code:", &resp.Core.Filesystem.Exec.ExitCode)
-
-	err = val.FillPath(cue.ParsePath("exit"), &resp.Core.Filesystem.Exec.ExitCode)
-
-	return val, err
+	return compiler.NewValue().FillFields(map[string]interface{}{
+		"output": pctx.FS.NewFS(fsid),
+		"exit":   0,
+	})
 	// opts = append(opts, withCustomName(v, "Exec [%s]", strings.Join(args, ", ")))
 
 	// st, err := common.root.State()
@@ -153,17 +165,14 @@ func parseCommon(pctx *plancontext.Context, v *compiler.Value) (*execCommon, err
 	// 	return nil, err
 	// }
 	// e.root = input
-	fsid, err := v.LookupPath(cue.MakePath(
-		cue.Str("input"),
-		cue.Str("$dagger"),
-		cue.Str("fs"),
-		cue.Hid("_id", pkg.DaggerPackage),
-	)).String()
-	e.FSID = fsid
+
+	// fsid, err := pctx.FS.GetId(v.Lookup("input"))
+	fsid, err := utils.GetFSId(v.Lookup("input"))
 
 	if err != nil {
 		return nil, err
 	}
+	e.FSID = fsid
 
 	// args
 	var cmd struct {
@@ -222,7 +231,7 @@ func parseCommon(pctx *plancontext.Context, v *compiler.Value) (*execCommon, err
 
 // fields that are common between sync and async execs
 type execCommon struct {
-	FSID    string
+	FSID    dagger.FSID
 	root    *plancontext.FS
 	args    []string
 	workdir string
@@ -342,11 +351,16 @@ func parseMount(pctx *plancontext.Context, v *compiler.Value) (mount, error) {
 			fsMount: &fsMount{},
 		}
 
-		contents, err := pctx.FS.FromValue(v.Lookup("contents"))
+		// contents, err := pctx.FS.FromValue(v.Lookup("contents"))
+		// if err != nil {
+		// 	return mount{}, err
+		// }
+		// mnt.fsMount.contents = contents
+		fsid, err := utils.GetFSId(v.Lookup("contents"))
 		if err != nil {
 			return mount{}, err
 		}
-		mnt.fsMount.contents = contents
+		mnt.fsMount.fsid = fsid
 
 		if source := v.Lookup("source"); source.Exists() {
 			src, err := source.String()
@@ -557,6 +571,7 @@ type socketMount struct {
 
 type fsMount struct {
 	contents *plancontext.FS
+	fsid     dagger.FSID
 	source   string
 	readonly bool
 }

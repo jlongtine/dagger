@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"cuelang.org/go/cue"
+	"github.com/dagger/cloak/sdk/go/dagger"
 	"github.com/google/uuid"
 	"github.com/moby/buildkit/client/llb"
 	bkgw "github.com/moby/buildkit/frontend/gateway/client"
@@ -73,6 +74,29 @@ func (c *fsContext) New(result bkgw.Reference) *FS {
 
 	c.store[fs.id] = fs
 	return fs
+}
+
+func (c *fsContext) GetId(v *compiler.Value) (dagger.FSID, error) {
+	var fsid dagger.FSID
+	if !v.LookupPath(fsIDPath).IsConcrete() {
+		return fsid, fmt.Errorf("invalid FS at path %q: FS is not set", v.Path())
+	}
+	id, err := v.LookupPath(fsIDPath).String()
+	if err != nil {
+		return fsid, fmt.Errorf("invalid FS at path %q: %w", v.Path(), err)
+	}
+	fsid = dagger.FSID(id)
+	return fsid, nil
+}
+
+func (c *fsContext) NewFS(id dagger.FSID) *compiler.Value {
+	v := compiler.NewValue()
+
+	if err := v.FillPath(fsIDPath, id); err != nil {
+		panic(err)
+	}
+
+	return v
 }
 
 func (c *fsContext) FromValue(v *compiler.Value) (*FS, error) {

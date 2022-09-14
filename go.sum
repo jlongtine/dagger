@@ -87,6 +87,8 @@ git.apache.org/thrift.git v0.12.0/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqbl
 github.com/99designs/gqlgen v0.17.2/go.mod h1:K5fzLKwtph+FFgh9j7nFbRUdBKvTcGnsta51fsMTn3o=
 github.com/99designs/gqlgen v0.17.16 h1:tTIw/cQ/uvf3iXIb2I6YSkdaDkmHmH2W2eZkVe0IVLA=
 github.com/99designs/gqlgen v0.17.16/go.mod h1:dnJdUkgfh8iw8CEx2hhTdgTQO/GvVWKLcm/kult5gwI=
+github.com/99designs/gqlgen v0.17.17 h1:UmdRb+8uCqK65nA9lKcjI8lJI+HzgwDz3/aNYtYCv6E=
+github.com/99designs/gqlgen v0.17.17/go.mod h1:tXjo2/o1L/9A8S/4nLK7Arx/677H8hxlD/iSTRx0BtE=
 github.com/AdaLogics/go-fuzz-headers v0.0.0-20210715213245-6c3934b029d8/go.mod h1:CzsSbkDixRphAF5hS6wbMKq0eI6ccJRb7/A0M6JBnwg=
 github.com/AkihiroSuda/containerd-fuse-overlayfs v1.0.0/go.mod h1:0mMDvQFeLbbn1Wy8P2j3hwFhqBq+FKn8OZPno8WLmp8=
 github.com/Antonboom/errname v0.1.5/go.mod h1:DugbBstvPFQbv/5uLcRRzfrNqKE9tVdVCqWCLp6Cifo=
@@ -520,6 +522,8 @@ github.com/d2g/dhcp4server v0.0.0-20181031114812-7d4a0a7f59a5/go.mod h1:Eo87+Kg/
 github.com/d2g/hardwareaddr v0.0.0-20190221164911-e7d9fbe030e4/go.mod h1:bMl4RjIciD2oAxI7DmWRx6gbeqrkoLqv3MV0vzNad+I=
 github.com/dagger/cloak v0.0.0-20220909182331-375fa903f302 h1:5mifK5qpoJKX95ayJ+W3cWsKDKr8t26nmfKG1ejxgI8=
 github.com/dagger/cloak v0.0.0-20220909182331-375fa903f302/go.mod h1:QLKCHr6Lb6d/vK+DXdqR5zx/c0JEAOa5LlJFGfmbs+w=
+github.com/dagger/cloak v0.0.0-20220914192131-31f71daaaac9 h1:XcV/Aogo0DHKhmyiigLMgc9je3s7AEsxFbHhPTi0HJE=
+github.com/dagger/cloak v0.0.0-20220914192131-31f71daaaac9/go.mod h1:R+jn5anxrhihykUTAKWIKXpY0vSQZM7FioEQi2OVsi0=
 github.com/dagger/cue v0.4.1-rc.1.0.20220121023213-66df011a52c2 h1:L2vtsG/SF/VOcVGcjS1hoZl8SpgX97TBVuezKc0eUqA=
 github.com/dagger/cue v0.4.1-rc.1.0.20220121023213-66df011a52c2/go.mod h1:P09/R4UfAEzLkV9DXxwlxQnIZbkaT4uIhiEgs6Vsz2Q=
 github.com/dagger/cuelsp v0.3.4 h1:bAdB2w5KLsDsQR5OO0t/xAK11lAKg3UP4cbYMUZWM48=
@@ -1707,6 +1711,8 @@ github.com/vektah/gqlparser/v2 v2.4.0/go.mod h1:flJWIR04IMQPGz+BXLrORkrARBxv/rty
 github.com/vektah/gqlparser/v2 v2.4.5/go.mod h1:flJWIR04IMQPGz+BXLrORkrARBxv/rtyIAFvd/MceW0=
 github.com/vektah/gqlparser/v2 v2.5.0 h1:GwEwy7AJsqPWrey0bHnn+3JLaHLZVT66wY/+O+Tf9SU=
 github.com/vektah/gqlparser/v2 v2.5.0/go.mod h1:mPgqFBu/woKTVYWyNk8cO3kh4S/f4aRFZrvOnp3hmCs=
+github.com/vektah/gqlparser/v2 v2.5.1 h1:ZGu+bquAY23jsxDRcYpWjttRZrUz07LbiY77gUOHcr4=
+github.com/vektah/gqlparser/v2 v2.5.1/go.mod h1:mPgqFBu/woKTVYWyNk8cO3kh4S/f4aRFZrvOnp3hmCs=
 github.com/viki-org/dnscache v0.0.0-20130720023526-c70c1f23c5d8/go.mod h1:dniwbG03GafCjFohMDmz6Zc6oCuiqgH6tGNyXTkHzXE=
 github.com/vishvananda/netlink v0.0.0-20181108222139-023a6dafdcdf/go.mod h1:+SR5DhBJrl6ZM7CoCKvpw5BKroDKQ+PJqOg65H/2ktk=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=

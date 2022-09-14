@@ -62,13 +62,13 @@ require github.com/google/go-cmp v0.5.8
 
 require (
 	github.com/Khan/genqlient v0.5.0
-	github.com/dagger/cloak v0.0.0-20220909182331-375fa903f302
+	github.com/dagger/cloak v0.0.0-20220914192131-31f71daaaac9
 	github.com/dagger/cuelsp v0.3.4
 	github.com/tliron/kutil v0.1.62
 )
 
 require (
-	github.com/99designs/gqlgen v0.17.16 // indirect
+	github.com/99designs/gqlgen v0.17.17 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -140,7 +140,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/tliron/glsp v0.1.2-0.20220705150211-aa8066a02133 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.0 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.1 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect

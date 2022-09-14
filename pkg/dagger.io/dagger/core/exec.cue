@@ -56,24 +56,24 @@ import "dagger.io/dagger"
 		type:     "cache"
 		contents: #CacheDir
 	} | {
-		type:     "tmp"
+		type:     "tmp" @cloak(notimplemented)
 		contents: #TempDir
 	} | {
-		type:     "socket"
+		type:     "socket" @cloak(notimplemented)
 		contents: dagger.#Socket
 	} | {
 		type:     "fs"
 		contents: dagger.#FS
-		source?:  string
-		ro?:      true | *false
+		source?:  string        @cloak(notimplemented)
+		ro?:      true | *false @cloak(notimplemented)
 	} | {
-		type:     "secret"
+		type:     "secret" @cloak(notimplemented)
 		contents: dagger.#Secret
 		uid:      int | *0
 		gid:      int | *0
 		mask:     int | *0o400
 	} | {
-		type:        "file"
+		type:        "file" @cloak(notimplemented)
 		contents:    string
 		permissions: *0o644 | int
 	}

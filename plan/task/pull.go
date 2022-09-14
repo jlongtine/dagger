@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"cuelang.org/go/cue"
 	"github.com/dagger/cloak/engine"
 	"github.com/docker/distribution/reference"
+	"go.dagger.io/dagger/cloak/utils"
 	"go.dagger.io/dagger/compiler"
 	"go.dagger.io/dagger/gen/core"
-	"go.dagger.io/dagger/pkg"
 	"go.dagger.io/dagger/plancontext"
 	"go.dagger.io/dagger/solver"
 )
@@ -147,21 +146,10 @@ func (c *pullTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 
 	// fs := pctx.FS.New(result)
 
-	val := compiler.NewValue()
-
-	err = val.FillPath(cue.MakePath(
-		cue.Str("output"),
-		cue.Str("$dagger"),
-		cue.Str("fs"),
-		cue.Hid("_id", pkg.DaggerPackage),
-	), fs.ID)
-
-	fmt.Println("fs ID:", fs.ID)
-
-	return val, err
-	// return compiler.NewValue().FillFields(map[string]interface{}{
-	// 	"output": fs.MarshalCUE(),
-	// 	// "digest": digest,
-	// 	// "config": ConvertImageConfig(image.Config),
-	// })
+	// return val, err
+	return compiler.NewValue().FillFields(map[string]interface{}{
+		"output": utils.NewFS(fs.ID),
+		// "digest": digest,
+		// "config": ConvertImageConfig(image.Config),
+	})
 }
