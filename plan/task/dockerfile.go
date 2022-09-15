@@ -2,11 +2,11 @@ package task
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	bkplatforms "github.com/containerd/containerd/platforms"
 	"github.com/dagger/cloak/engine"
-	"github.com/rs/zerolog/log"
 
 	"go.dagger.io/dagger/cloak/utils"
 	"go.dagger.io/dagger/compiler"
@@ -22,13 +22,13 @@ func init() {
 type dockerfileTask struct{}
 
 func (t *dockerfileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
-	lg := log.Ctx(ctx)
+	// lg := log.Ctx(ctx)
 	// auths, err := v.Lookup("auth").Fields()
 	// if err != nil {
 	// 	return nil, err
 	// }
 
-	r // 	// Read auth info
+	// 	// Read auth info
 	// 	a, err := decodeAuthValue(pctx, auth.Value)
 	// 	if err != nil {
 	// 		return nil, err
@@ -157,6 +157,8 @@ func (t *dockerfileTask) Run(ctx context.Context, pctx *plancontext.Context, ect
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		return nil, errors.New("dockerfile.contents is not implemented")
 	}
 
 	resp, err := core.Dockerfile(ectx, fsid, filename)
