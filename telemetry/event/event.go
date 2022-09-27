@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"go.dagger.io/dagger/version"
+	"go.dagger.io/dagger-classic/version"
 )
 
 const eventVersion = "2022-05-25.01"

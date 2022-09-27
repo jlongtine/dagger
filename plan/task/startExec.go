@@ -10,10 +10,10 @@ import (
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/solver/pb"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/pkg"
-	"go.dagger.io/dagger/plancontext"
-	"go.dagger.io/dagger/solver"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/pkg"
+	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger-classic/solver"
 )
 
 func init() {

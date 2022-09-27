@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"go.dagger.io/dagger/analytics"
+	"go.dagger.io/dagger-classic/analytics"
 )
 
 // TrackCommand sends analytics about a command execution

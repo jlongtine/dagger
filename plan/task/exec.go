@@ -9,16 +9,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dagger/cloak/engine"
-	"github.com/dagger/cloak/sdk/go/dagger"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/solver/pb"
-	"go.dagger.io/dagger/cloak/utils"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/gen/core"
-	"go.dagger.io/dagger/plancontext"
-	"go.dagger.io/dagger/solver"
+	"go.dagger.io/dagger-classic/cloak/utils"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/gen/core"
+	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger-classic/solver"
+	"go.dagger.io/dagger/engine"
+	"go.dagger.io/dagger/sdk/go/dagger"
 )
 
 func init() {

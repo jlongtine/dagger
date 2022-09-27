@@ -30,15 +30,15 @@ import (
 	"github.com/moby/buildkit/session"
 
 	// docker output
-	"go.dagger.io/dagger/plan/task"
-	"go.dagger.io/dagger/plancontext"
-	"go.dagger.io/dagger/telemetry"
-	"go.dagger.io/dagger/telemetry/event"
-	"go.dagger.io/dagger/util/buildkitd"
-	"go.dagger.io/dagger/util/progressui"
+	"go.dagger.io/dagger-classic/plan/task"
+	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger-classic/telemetry"
+	"go.dagger.io/dagger-classic/telemetry/event"
+	"go.dagger.io/dagger-classic/util/buildkitd"
+	"go.dagger.io/dagger-classic/util/progressui"
 
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/solver"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/solver"
 )
 
 // Client is a dagger client

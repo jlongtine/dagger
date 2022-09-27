@@ -14,7 +14,7 @@ import (
 	"github.com/containerd/console"
 	"github.com/morikuni/aec"
 	"github.com/tonistiigi/vt100"
-	"go.dagger.io/dagger/plan/task"
+	"go.dagger.io/dagger-classic/plan/task"
 )
 
 type Event map[string]interface{}

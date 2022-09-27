@@ -18,7 +18,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/plancontext"
 )
 
 type Solver struct {

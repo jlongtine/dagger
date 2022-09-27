@@ -6,8 +6,8 @@ import (
 	"cuelang.org/go/cue"
 	cueerrors "cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/token"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/plancontext"
 )
 
 const (

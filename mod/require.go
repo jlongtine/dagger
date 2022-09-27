@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"go.dagger.io/dagger/pkg"
+	"go.dagger.io/dagger-classic/pkg"
 )
 
 type Require struct {

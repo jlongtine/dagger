@@ -9,8 +9,8 @@ import (
 	"github.com/gofrs/flock"
 	"github.com/mitchellh/go-homedir"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/plancontext"
 )
 
 const clientFSTempKey = "client-filesystem-lock"

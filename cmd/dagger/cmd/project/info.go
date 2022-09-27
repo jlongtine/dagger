@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/cmd/dagger/logger"
-	"go.dagger.io/dagger/pkg"
+	"go.dagger.io/dagger-classic/cmd/dagger/logger"
+	"go.dagger.io/dagger-classic/pkg"
 )
 
 var infoCmd = &cobra.Command{

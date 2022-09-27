@@ -1,8 +1,8 @@
 package task
 
 import (
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/plancontext"
 )
 
 type authValue struct {
@@ -13,10 +13,11 @@ type authValue struct {
 // Decodes an auth field value
 //
 // Cue format:
-//   auth: {
-//     username: string
-//     secret:   string | #Secret
-//   }
+//
+//	auth: {
+//	  username: string
+//	  secret:   string | #Secret
+//	}
 func decodeAuthValue(pctx *plancontext.Context, v *compiler.Value) (*authValue, error) {
 	authVal := authValue{}
 	username, err := v.Lookup("username").String()

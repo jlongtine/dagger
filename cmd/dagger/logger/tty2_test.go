@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tonistiigi/vt100"
-	"go.dagger.io/dagger/plan/task"
+	"go.dagger.io/dagger-classic/plan/task"
 )
 
 type mockConsole struct {

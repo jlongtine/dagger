@@ -14,7 +14,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/version"
+	"go.dagger.io/dagger-classic/version"
 	"golang.org/x/term"
 )
 

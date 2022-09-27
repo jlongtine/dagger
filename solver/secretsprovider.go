@@ -7,7 +7,7 @@ import (
 	"github.com/moby/buildkit/session/secrets"
 	"github.com/moby/buildkit/session/secrets/secretsprovider"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/plancontext"
 )
 
 func NewSecretsStoreProvider(pctx *plancontext.Context) session.Attachable {

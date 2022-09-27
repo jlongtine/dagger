@@ -18,10 +18,10 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/cmd/dagger/cmd/common"
-	"go.dagger.io/dagger/cmd/dagger/logger"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/pkg"
+	"go.dagger.io/dagger-classic/cmd/dagger/cmd/common"
+	"go.dagger.io/dagger-classic/cmd/dagger/logger"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/pkg"
 	"golang.org/x/term"
 )
 

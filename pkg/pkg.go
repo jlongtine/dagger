@@ -15,7 +15,7 @@ import (
 	"github.com/gofrs/flock"
 	gv "github.com/hashicorp/go-version"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/version"
+	"go.dagger.io/dagger-classic/version"
 )
 
 var (

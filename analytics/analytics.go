@@ -13,9 +13,9 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/engine"
-	"go.dagger.io/dagger/pkg"
-	"go.dagger.io/dagger/version"
+	"go.dagger.io/dagger-classic/engine"
+	"go.dagger.io/dagger-classic/pkg"
+	"go.dagger.io/dagger-classic/version"
 )
 
 const (

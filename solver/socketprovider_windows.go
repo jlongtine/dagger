@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Microsoft/go-winio"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/plancontext"
 )
 
 func dialSocket(socket *plancontext.Socket) (net.Conn, error) {

@@ -9,9 +9,9 @@ import (
 	"cuelang.org/go/cue"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/plancontext"
-	"go.dagger.io/dagger/solver"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger-classic/solver"
 )
 
 func init() {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/plancontext"
-	"go.dagger.io/dagger/solver"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger-classic/solver"
 )
 
 func init() {

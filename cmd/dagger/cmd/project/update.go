@@ -3,10 +3,10 @@ package project
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/cmd/dagger/cmd/common"
-	"go.dagger.io/dagger/cmd/dagger/logger"
-	"go.dagger.io/dagger/mod"
-	"go.dagger.io/dagger/pkg"
+	"go.dagger.io/dagger-classic/cmd/dagger/cmd/common"
+	"go.dagger.io/dagger-classic/cmd/dagger/logger"
+	"go.dagger.io/dagger-classic/mod"
+	"go.dagger.io/dagger-classic/pkg"
 )
 
 var updateCmd = &cobra.Command{

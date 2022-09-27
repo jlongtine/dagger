@@ -2,7 +2,7 @@ package plan
 
 import (
 	"cuelang.org/go/cue"
-	"go.dagger.io/dagger/compiler"
+	"go.dagger.io/dagger-classic/compiler"
 )
 
 type Action struct {

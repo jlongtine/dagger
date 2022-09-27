@@ -5,12 +5,12 @@ import (
 	"sync"
 
 	"cuelang.org/go/cue"
-	"github.com/dagger/cloak/sdk/go/dagger"
 	"github.com/google/uuid"
 	"github.com/moby/buildkit/client/llb"
 	bkgw "github.com/moby/buildkit/frontend/gateway/client"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/pkg"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/pkg"
+	"go.dagger.io/dagger/sdk/go/dagger"
 )
 
 var fsIDPath = cue.MakePath(

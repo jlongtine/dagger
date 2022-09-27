@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/api/auth"
-	"go.dagger.io/dagger/cmd/dagger/logger"
+	"go.dagger.io/dagger-classic/api/auth"
+	"go.dagger.io/dagger-classic/cmd/dagger/logger"
 )
 
 var logoutCmd = &cobra.Command{

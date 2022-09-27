@@ -13,8 +13,8 @@ import (
 	"github.com/mattn/go-colorable"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/api/auth"
-	"go.dagger.io/dagger/telemetry"
+	"go.dagger.io/dagger-classic/api/auth"
+	"go.dagger.io/dagger-classic/telemetry"
 	"golang.org/x/term"
 )
 

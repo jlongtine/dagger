@@ -4,7 +4,7 @@ import (
 	"github.com/dagger/cuelsp/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/cmd/dagger/logger"
+	"go.dagger.io/dagger-classic/cmd/dagger/logger"
 
 	// Required to use LSP logger
 	_ "github.com/tliron/kutil/logging/simple"

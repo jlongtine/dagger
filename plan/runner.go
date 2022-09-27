@@ -7,18 +7,18 @@ import (
 	"sync"
 	"time"
 
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/plan/task"
-	"go.dagger.io/dagger/plancontext"
-	"go.dagger.io/dagger/solver"
-	"go.dagger.io/dagger/telemetry"
-	"go.dagger.io/dagger/telemetry/event"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/plan/task"
+	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger-classic/solver"
+	"go.dagger.io/dagger-classic/telemetry"
+	"go.dagger.io/dagger-classic/telemetry/event"
 
 	"cuelang.org/go/cue"
 	cueflow "cuelang.org/go/tools/flow"
 
-	"github.com/dagger/cloak/engine"
 	"github.com/rs/zerolog/log"
+	"go.dagger.io/dagger/engine"
 	"go.opentelemetry.io/otel"
 )
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/solver/pb"
-	"go.dagger.io/dagger/compiler"
+	"go.dagger.io/dagger-classic/compiler"
 )
 
 func withCustomName(v *compiler.Value, format string, a ...interface{}) llb.ConstraintsOpt {

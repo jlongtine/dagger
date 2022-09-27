@@ -8,8 +8,8 @@ import (
 
 	"github.com/gofrs/flock"
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/pkg"
-	"go.dagger.io/dagger/version"
+	"go.dagger.io/dagger-classic/pkg"
+	"go.dagger.io/dagger-classic/version"
 )
 
 func InstallDagger(ctx context.Context, workspace string) ([]*Require, error) {

@@ -8,8 +8,8 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/pkg/encoding/yaml"
-	"go.dagger.io/dagger/cmd/dagger/cmd/common"
-	"go.dagger.io/dagger/compiler"
+	"go.dagger.io/dagger-classic/cmd/dagger/cmd/common"
+	"go.dagger.io/dagger-classic/compiler"
 )
 
 func PrintOutputs(fields []compiler.Field, format, file string) error {

@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog"
-	"go.dagger.io/dagger/telemetry"
-	"go.dagger.io/dagger/telemetry/event"
+	"go.dagger.io/dagger-classic/telemetry"
+	"go.dagger.io/dagger-classic/telemetry/event"
 )
 
 type Cloud struct {

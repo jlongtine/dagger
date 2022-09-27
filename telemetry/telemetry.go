@@ -11,10 +11,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	"go.dagger.io/dagger/api"
-	"go.dagger.io/dagger/api/auth"
-	"go.dagger.io/dagger/engine"
-	"go.dagger.io/dagger/telemetry/event"
+	"go.dagger.io/dagger-classic/api"
+	"go.dagger.io/dagger-classic/api/auth"
+	"go.dagger.io/dagger-classic/engine"
+	"go.dagger.io/dagger-classic/telemetry/event"
 )
 
 const (

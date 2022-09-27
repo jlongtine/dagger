@@ -16,7 +16,7 @@ import (
 	"github.com/morikuni/aec"
 	"github.com/muesli/ansi"
 	"github.com/tonistiigi/vt100"
-	"go.dagger.io/dagger/plan/task"
+	"go.dagger.io/dagger-classic/plan/task"
 	"golang.org/x/sync/errgroup"
 )
 

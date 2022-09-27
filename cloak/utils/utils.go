@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"cuelang.org/go/cue"
-	"github.com/dagger/cloak/sdk/go/dagger"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/pkg"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/pkg"
+	"go.dagger.io/dagger/sdk/go/dagger"
 )
 
 var fsIDPath = cue.MakePath(

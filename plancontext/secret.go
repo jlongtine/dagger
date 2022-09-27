@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"cuelang.org/go/cue"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/pkg"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/pkg"
 )
 
 var (

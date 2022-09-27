@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/api/auth"
-	"go.dagger.io/dagger/version"
+	"go.dagger.io/dagger-classic/api/auth"
+	"go.dagger.io/dagger-classic/version"
 )
 
 // Client is the API client

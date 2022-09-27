@@ -7,11 +7,11 @@ import (
 	"sync"
 
 	"cuelang.org/go/cue"
-	cloakengine "github.com/dagger/cloak/engine"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/pkg"
-	"go.dagger.io/dagger/plancontext"
-	"go.dagger.io/dagger/solver"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/pkg"
+	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger-classic/solver"
+	cloakengine "go.dagger.io/dagger/engine"
 )
 
 var (

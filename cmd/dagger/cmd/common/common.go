@@ -15,9 +15,9 @@ import (
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"go.dagger.io/dagger/client"
-	"go.dagger.io/dagger/compiler"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/client"
+	"go.dagger.io/dagger-classic/compiler"
+	"go.dagger.io/dagger-classic/plancontext"
 )
 
 // FormatValue returns the String representation of the cue value

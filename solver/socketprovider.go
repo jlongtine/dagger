@@ -6,7 +6,7 @@ import (
 
 	"github.com/moby/buildkit/session"
 	"github.com/moby/buildkit/session/sshforward"
-	"go.dagger.io/dagger/plancontext"
+	"go.dagger.io/dagger-classic/plancontext"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
