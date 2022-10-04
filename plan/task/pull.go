@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/docker/distribution/reference"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
-	"go.dagger.io/dagger-classic/gen/core"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
 	"go.dagger.io/dagger/engine"
+	"go.dagger.io/dagger/sdk/go/dagger"
 )
 
 func init() {
@@ -141,14 +142,40 @@ func (c *pullTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	// `}, resp)
 	// fmt.Println("Query response:", resp.Data)
 
-	ir, err := core.Image(ectx, rawRef)
-	fs := ir.Core.Image
+	res := struct {
+		Core struct {
+			Image struct {
+				Id string
+			}
+		}
+	}{}
+
+	err = ectx.Client.MakeRequest(ctx,
+		&graphql.Request{
+			Query: `
+			query ($ref: String!){
+				core {
+					image(ref: $ref) {
+						id
+					}
+				}
+			}
+			`,
+			Variables: &map[string]string{
+				"ref": ref.String(),
+			},
+		},
+		&graphql.Response{Data: &res},
+	)
+
+	// ir, err := core.Image(ectx, rawRef)
+	fs := res.Core.Image
 
 	// fs := pctx.FS.New(result)
 
 	// return val, err
 	return compiler.NewValue().FillFields(map[string]interface{}{
-		"output": utils.NewFS(fs.ID),
+		"output": utils.NewFS(dagger.FSID(fs.Id)),
 		// "digest": digest,
 		// "config": ConvertImageConfig(image.Config),
 	})

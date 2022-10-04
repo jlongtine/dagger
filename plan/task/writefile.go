@@ -3,24 +3,26 @@ package task
 import (
 	"context"
 	"fmt"
-	"io/fs"
 
 	"cuelang.org/go/cue"
-	"github.com/moby/buildkit/client/llb"
+	"github.com/Khan/genqlient/graphql"
+	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
+	"go.dagger.io/dagger/engine"
+	"go.dagger.io/dagger/sdk/go/dagger"
 )
 
 func init() {
-	// Register("WriteFile", func() Task { return &writeFileTask{} })
+	Register("WriteFile", func() Task { return &writeFileTask{} })
 }
 
 type writeFileTask struct {
 }
 
-func (t *writeFileTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
-	var contents []byte
+func (t *writeFileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+	var str string
 	var err error
 
 	path, err := v.Lookup("path").String()
@@ -34,11 +36,7 @@ func (t *writeFileTask) Run(ctx context.Context, pctx *plancontext.Context, s *s
 	// case cue.BytesKind:
 	// 	contents, err = v.Lookup("contents").Bytes()
 	case cue.StringKind:
-		var str string
 		str, err = contentsVal.String()
-		if err == nil {
-			contents = []byte(str)
-		}
 	case cue.BottomKind:
 		err = fmt.Errorf("%s: WriteFile contents is not set:\n\n%s", path, compiler.Err(contentsVal.Cue().Err()))
 	default:
@@ -49,37 +47,55 @@ func (t *writeFileTask) Run(ctx context.Context, pctx *plancontext.Context, s *s
 		return nil, err
 	}
 
-	permissions, err := v.Lookup("permissions").Int64()
+	// permissions, err := v.Lookup("permissions").Int64()
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	fsid, err := utils.GetFSId(v.Lookup("input"))
+
 	if err != nil {
 		return nil, err
 	}
 
-	input, err := pctx.FS.FromValue(v.Lookup("input"))
-	if err != nil {
-		return nil, err
-	}
+	res := struct {
+		Core struct {
+			Filesystem struct {
+				WriteFile struct {
+					ID string
+				}
+			}
+		}
+	}{}
 
-	inputState, err := input.State()
-	if err != nil {
-		return nil, err
-	}
-
-	outputState := inputState.File(
-		llb.Mkfile(path, fs.FileMode(permissions), contents),
-		withCustomName(v, "WriteFile %s", path),
+	err = ectx.Client.MakeRequest(ctx,
+		&graphql.Request{
+			Query: `
+			query ($fsid: FSID!, $contents: String!, $path: String!) {
+				core {
+					filesystem(id: $fsid) {
+						writeFile(
+							contents: $contents
+							path: $path
+						) {
+							id
+						}
+					}
+				}
+			}
+			`,
+			Variables: &map[string]interface{}{
+				"fsid":     fsid,
+				"contents": str,
+				"path":     path,
+			},
+		},
+		&graphql.Response{Data: &res},
 	)
 
-	result, err := s.Solve(ctx, outputState, pctx.Platform.Get())
-	if err != nil {
-		return nil, err
-	}
+	outputFS := utils.NewFS(dagger.FSID(res.Core.Filesystem.WriteFile.ID))
 
-	outputFS := pctx.FS.New(result)
-
-	output := compiler.NewValue()
-	if err := output.FillPath(cue.ParsePath("output"), outputFS.MarshalCUE()); err != nil {
-		return nil, err
-	}
-
-	return output, nil
+	return compiler.NewValue().FillFields(map[string]interface{}{
+		"output": outputFS,
+	})
 }

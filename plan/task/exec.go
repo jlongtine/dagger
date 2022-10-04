@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/solver/pb"
@@ -33,7 +34,7 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	if err != nil {
 		return nil, err
 	}
-	// fmt.Println("dude...")
+	// fmt.Println("dude...", common)
 	// return compiler.NewValue(), nil
 	// opts, err := common.runOpts()
 	// if err != nil {
@@ -117,19 +118,82 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 		default:
 		}
 	}
-	resp, err := core.Exec(ectx, common.FSID, core.ExecInput{
-		Args:        common.args,
-		Workdir:     common.workdir,
-		Env:         envInput,
-		SecretEnv:   secretEnvInput,
-		Mounts:      mounts,
-		CacheMounts: cacheMounts,
-	})
 
-	fsid := resp.Core.Filesystem.ID
+	res := struct {
+		Core struct {
+			Filesystem struct {
+				Exec struct {
+					ExitCode int
+					Stderr   string
+					Stdout   string
+					Fs       struct {
+						Id string
+					}
+				}
+			}
+		}
+	}{}
+
+	err = ectx.Client.MakeRequest(ctx,
+		&graphql.Request{
+			Query: `
+			query ($fsid: FSID!, 
+						 $args: [String!]!, 
+						 $workdir: String, 
+						 $env: [ExecEnvInput!],
+						 $secretEnv: [ExecSecretEnvInput!],
+						 $mounts: [MountInput!],
+						 $cacheMounts: [CacheMountInput!]
+			) {
+				core {
+					filesystem(id: $fsid) {
+						exec(input: {
+							args: $args
+							workdir: $workdir
+							env: $env
+							secretEnv: $secretEnv
+							mounts: $mounts
+							cacheMounts: $cacheMounts
+						}) {
+							exitCode
+							stderr
+							stdout
+							fs {
+								id
+							}
+						}
+					}
+				}
+			}
+			`,
+			Variables: &map[string]interface{}{
+				"fsid":        common.FSID,
+				"args":        common.args,
+				"workdir":     common.workdir,
+				"env":         envInput,
+				"secretEnv":   secretEnvInput,
+				"mounts":      mounts,
+				"cacheMounts": cacheMounts,
+			},
+		},
+		&graphql.Response{Data: &res},
+	)
+
+	fsid := res.Core.Filesystem.Exec.Fs.Id
+
+	// resp, err := core.Exec(ectx, common.FSID, core.ExecInput{
+	// 	Args:        common.args,
+	// 	Workdir:     common.workdir,
+	// 	Env:         envInput,
+	// 	SecretEnv:   secretEnvInput,
+	// 	Mounts:      mounts,
+	// 	CacheMounts: cacheMounts,
+	// })
+
+	// fsid := resp.Core.Filesystem.ID
 
 	return compiler.NewValue().FillFields(map[string]interface{}{
-		"output": pctx.FS.NewFS(fsid),
+		"output": pctx.FS.NewFS(dagger.FSID(fsid)),
 		"exit":   0,
 	})
 	// opts = append(opts, withCustomName(v, "Exec [%s]", strings.Join(args, ", ")))

@@ -49,10 +49,109 @@ dagger.#Plan & {
 			}
 		}
 
+		exec6: core.#Exec & {
+			input: pull.output
+			args: ["ls"]
+			workdir: "/bin"
+		}
+
 		exec2: core.#Exec & {
 			input: pull.output
 			env: "JOEL": "joel1234"
 			args: ["printenv", "JOEL"]
+		}
+
+		git: {
+			repo: core.#GitPull & {
+				remote: "https://github.com/dagger/dagger"
+				ref:    "cloak"
+			}
+
+			image: core.#Pull & {
+				source: "alpine:3.15.0"
+			}
+
+			verify: core.#Exec & {
+				input: image.output
+				// args: ["ls", "/"]
+				// args: ["cat", "/etc/alpine-release"]
+				args: ["cat", "/dagger/README.md"]
+				mounts: {
+					a: {dest: "/dagger", contents: repo.output}
+				}
+			}
+		}
+
+		writefile: {
+			w: core.#WriteFile & {
+				input:    pull.output
+				path:     "/joel.txt"
+				contents: "writefile - hello from joel - bitches\n"
+			}
+			verify: core.#Exec & {
+				input: w.output
+				args: ["cat", "/joel.txt"]
+			}
+		}
+
+		dockerfile: {
+			w: core.#WriteFile & {
+				input: pull.output
+				path:  "/Dockerfile"
+				contents: """
+					  FROM alpine
+					  RUN echo 'dockerfile - hello world, from joel - for real' > joel.txt
+					"""
+			}
+			d: core.#Dockerfile & {
+				source: w.output
+				dockerfile: path: "/Dockerfile"
+			}
+
+			verify: core.#Exec & {
+				input: d.output
+				args: ["cat", "/joel.txt"]
+			}
+		}
+
+		readfile: {
+			image: core.#Pull & {
+				source: "alpine:3.15.0@sha256:e7d88de73db3d3fd9b2d63aa7f447a10fd0220b7cbf39803c803f2af9ba256b3"
+			}
+
+			readfile: core.#ReadFile & {
+				input: image.output
+				path:  "/etc/alpine-release"
+			} & {
+				// assert result
+				contents: "3.15.0\n"
+			}
+		}
+		copy: {
+			copyRelease: core.#Copy & {
+				input:    pull.output
+				contents: pull315.output
+				source:   "/etc/alpine-release"
+				dest:     "/etc/alpine-release-3.15"
+			}
+			readfile1: core.#ReadFile & {
+				input: copyRelease.output
+				path:  "/etc/alpine-release"
+			} & {
+				// assert result
+				contents: "3.16.2\n"
+			}
+			readfile2: core.#ReadFile & {
+				input: copyRelease.output
+				path:  "/etc/alpine-release-3.15"
+			} & {
+				// assert result
+				contents: "3.15.6\n"
+			}
+		}
+		push: core.#Push & {
+			input: pull.output
+			dest:  "localhost:5042/alpine"
 		}
 	}
 }
