@@ -9,17 +9,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Khan/genqlient/graphql"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/solver/pb"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
-	"go.dagger.io/dagger-classic/gen/core"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
 	"go.dagger.io/dagger/sdk/go/dagger"
+	"go.dagger.io/dagger/sdk/go/dagger/api"
 )
 
 func init() {
@@ -29,7 +27,7 @@ func init() {
 type execTask struct {
 }
 
-func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	common, err := parseCommon(pctx, v)
 	if err != nil {
 		return nil, err
@@ -42,34 +40,6 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	// }
 
 	// env
-	envInput := []core.ExecEnvInput{}
-	secretEnvInput := []core.ExecSecretEnvInput{}
-	envs, err := v.Lookup("env").Fields()
-	if err != nil {
-		return nil, err
-	}
-	for _, env := range envs {
-		if plancontext.IsSecretValue(env.Value) {
-			id, err := utils.GetSecretId(env.Value)
-
-			if err != nil {
-				return nil, err
-			}
-			secretEnvInput = append(secretEnvInput, core.ExecSecretEnvInput{
-				Name: env.Label(),
-				Id:   id,
-			})
-		} else {
-			s, err := env.Value.String()
-			if err != nil {
-				return nil, err
-			}
-			envInput = append(envInput, core.ExecEnvInput{
-				Name:  env.Label(),
-				Value: s,
-			})
-		}
-	}
 
 	// always run
 	// always, err := v.Lookup("always").Bool()
@@ -85,137 +55,80 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	// 	args = append(args, fmt.Sprintf("%q", a))
 	// }
 
-	mounts := []core.MountInput{}
+	dgr := s.Client.Core()
 
-	cacheMounts := []core.CacheMountInput{}
+	ctr := dgr.Container().WithFS(api.DirectoryID(common.FSID))
+
+	envs, err := v.Lookup("env").Fields()
+	if err != nil {
+		return nil, err
+	}
+	for _, env := range envs {
+		if plancontext.IsSecretValue(env.Value) {
+			id, err := utils.GetSecretId(env.Value)
+
+			if err != nil {
+				return nil, err
+			}
+			ctr = ctr.WithSecretVariable(env.Label(), api.SecretID(id))
+		} else {
+			s, err := env.Value.String()
+			if err != nil {
+				return nil, err
+			}
+			ctr = ctr.WithEnvVariable(env.Label(), s)
+		}
+	}
 
 	for _, m := range common.mounts {
 		switch {
 		case m.cacheMount != nil:
-			var sharingMode string
-			switch m.cacheMount.concurrency {
-			case llb.CacheMountShared:
-				sharingMode = "shared"
-			case llb.CacheMountPrivate:
-				sharingMode = "private"
-			case llb.CacheMountLocked:
-				sharingMode = "locked"
-			}
+			// TODO: Need sharing mode...
+			// var sharingMode string
+			// switch m.cacheMount.concurrency {
+			// case llb.CacheMountShared:
+			// 	sharingMode = "shared"
+			// case llb.CacheMountPrivate:
+			// 	sharingMode = "private"
+			// case llb.CacheMountLocked:
+			// 	sharingMode = "locked"
+			// }
 
-			cacheMounts = append(cacheMounts, core.CacheMountInput{
-				Name:        m.cacheMount.id,
-				SharingMode: sharingMode,
-				Path:        m.dest,
-			})
+			ctr = ctr.WithMountedCache(api.CacheID(m.cacheMount.id), m.dest)
 		// case m.tmpMount != nil:
 		case m.fsMount != nil:
-			mounts = append(mounts, core.MountInput{
-				Fs:   m.fsMount.fsid,
-				Path: m.dest,
-			})
+			ctr = ctr.WithMountedDirectory(m.dest, api.DirectoryID(m.fsMount.fsid))
 		// case m.secretMount != nil:
 		// case m.fileMount != nil:
 		default:
 		}
 	}
 
-	res := struct {
-		Core struct {
-			Filesystem struct {
-				Exec struct {
-					ExitCode int
-					Stderr   string
-					Stdout   string
-					Fs       struct {
-						Id string
-					}
-				}
-			}
-		}
-	}{}
+	ctr = ctr.WithUser(common.user).WithWorkdir(common.workdir)
 
-	err = ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query ($fsid: FSID!, 
-						 $args: [String!]!, 
-						 $workdir: String, 
-						 $env: [ExecEnvInput!],
-						 $secretEnv: [ExecSecretEnvInput!],
-						 $mounts: [MountInput!],
-						 $cacheMounts: [CacheMountInput!]
-			) {
-				core {
-					filesystem(id: $fsid) {
-						exec(input: {
-							args: $args
-							workdir: $workdir
-							env: $env
-							secretEnv: $secretEnv
-							mounts: $mounts
-							cacheMounts: $cacheMounts
-						}) {
-							exitCode
-							stderr
-							stdout
-							fs {
-								id
-							}
-						}
-					}
-				}
-			}
-			`,
-			Variables: &map[string]interface{}{
-				"fsid":        common.FSID,
-				"args":        common.args,
-				"workdir":     common.workdir,
-				"env":         envInput,
-				"secretEnv":   secretEnvInput,
-				"mounts":      mounts,
-				"cacheMounts": cacheMounts,
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
+	exec := ctr.Exec(api.ContainerExecOpts{
+		Args: common.args,
+	})
+	fsid, err := exec.FS().ID(ctx)
 
-	fsid := res.Core.Filesystem.Exec.Fs.Id
+	if err != nil {
+		return nil, err
+	}
+	stdout, err := exec.Stdout().Contents(ctx)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(stdout)
 
-	// resp, err := core.Exec(ectx, common.FSID, core.ExecInput{
-	// 	Args:        common.args,
-	// 	Workdir:     common.workdir,
-	// 	Env:         envInput,
-	// 	SecretEnv:   secretEnvInput,
-	// 	Mounts:      mounts,
-	// 	CacheMounts: cacheMounts,
-	// })
-
-	// fsid := resp.Core.Filesystem.ID
+	exit, err := exec.ExitCode(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	return compiler.NewValue().FillFields(map[string]interface{}{
 		"output": pctx.FS.NewFS(dagger.FSID(fsid)),
-		"exit":   0,
+		"exit":   exit,
 	})
-	// opts = append(opts, withCustomName(v, "Exec [%s]", strings.Join(args, ", ")))
-
-	// st, err := common.root.State()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// st = st.Run(opts...).Root()
-
-	// Solve
-	// result, err := s.Solve(ctx, st, pctx.Platform.Get())
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// Fill result
-	// resultFS := pctx.FS.New(result)
-	// return compiler.NewValue().FillFields(map[string]interface{}{
-	// 	"output": resultFS.MarshalCUE(),
-	// 	"exit":   0,
-	// })
 }
 
 func parseCommon(pctx *plancontext.Context, v *compiler.Value) (*execCommon, error) {

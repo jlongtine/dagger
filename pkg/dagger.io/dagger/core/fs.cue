@@ -5,7 +5,9 @@ import "dagger.io/dagger"
 // Access the source directory for the current CUE package
 // This may safely be called from any package
 #Source: {
-	$dagger: task: _name: "Source"
+	$dagger: task: {
+		_name: "Source" @cloak(notimplemented)
+	}
 
 	// Relative path to source.
 	path: string
@@ -29,10 +31,10 @@ import "dagger.io/dagger"
 	path: string
 
 	// Permissions of the directory
-	permissions: *0o755 | int
+	permissions: *0o755 | int @cloak(notimplemented)
 
 	// If set, it creates parents' directory if they do not exist
-	parents: *true | false
+	parents: *true | false @cloak(notimplemented)
 
 	// Modified filesystem
 	output: dagger.#FS @dagger(generated)
@@ -79,9 +81,9 @@ import "dagger.io/dagger"
 	// Destination path (optional)
 	dest: string | *"/"
 	// Optionally include certain files
-	include: [...string]
+	include: [...string] @cloak(notimplemented)
 	// Optionally exclude certain files
-	exclude: [...string]
+	exclude: [...string] @cloak(notimplemented)
 	// Output of the operation
 	output: dagger.#FS @dagger(generated)
 }

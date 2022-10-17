@@ -5,12 +5,11 @@ import (
 	"fmt"
 
 	"cuelang.org/go/cue"
-	"github.com/Khan/genqlient/graphql"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
+	"go.dagger.io/dagger/sdk/go/dagger/api"
 )
 
 func init() {
@@ -20,7 +19,7 @@ func init() {
 type readFileTask struct {
 }
 
-func (t *readFileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, _ *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (t *readFileTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	path, err := v.Lookup("path").String()
 	if err != nil {
 		return nil, err
@@ -32,34 +31,9 @@ func (t *readFileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx 
 		return nil, err
 	}
 
-	res := struct {
-		Core struct {
-			Filesystem struct {
-				File string
-			}
-		}
-	}{}
+	dgr := s.Client.Core()
 
-	err = ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query ($fsid: FSID!, $path: String!) {
-				core {
-					filesystem(id: $fsid) {
-						file(
-							path: $path
-						) 
-					}
-				}
-			}
-			`,
-			Variables: &map[string]interface{}{
-				"fsid": fsid,
-				"path": path,
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
+	file, err := dgr.Directory(api.DirectoryOpts{ID: api.DirectoryID(fsid)}).File(path).Contents(ctx)
 
 	// FIXME: we should create an intermediate image containing only `path`.
 	// That way, on cache misses, we'll only download the layer with the file contents rather than the entire FS.
@@ -68,7 +42,7 @@ func (t *readFileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx 
 	}
 
 	output := compiler.NewValue()
-	if err := output.FillPath(cue.ParsePath("contents"), string(res.Core.Filesystem.File)); err != nil {
+	if err := output.FillPath(cue.ParsePath("contents"), file); err != nil {
 		return nil, err
 	}
 

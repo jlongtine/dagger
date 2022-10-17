@@ -15,7 +15,7 @@ dagger.#Plan & {
 		}
 		exec: core.#Exec & {
 			input: pull.output
-			args: ["echo", "hello world", "from joel 3"]
+			args: ["echo", "hello world", "from joel 12345"]
 		}
 
 		print_versions: {
@@ -94,25 +94,25 @@ dagger.#Plan & {
 			}
 		}
 
-		dockerfile: {
-			w: core.#WriteFile & {
-				input: pull.output
-				path:  "/Dockerfile"
-				contents: """
-					  FROM alpine
-					  RUN echo 'dockerfile - hello world, from joel - for real' > joel.txt
-					"""
-			}
-			d: core.#Dockerfile & {
-				source: w.output
-				dockerfile: path: "/Dockerfile"
-			}
+		// dockerfile: {
+		// 	w: core.#WriteFile & {
+		// 		input: pull.output
+		// 		path:  "/Dockerfile"
+		// 		contents: """
+		// 			  FROM alpine
+		// 			  RUN echo 'dockerfile - hello world, from joel - for real' > joel.txt
+		// 			"""
+		// 	}
+		// 	d: core.#Dockerfile & {
+		// 		source: w.output
+		// 		dockerfile: path: "/Dockerfile"
+		// 	}
 
-			verify: core.#Exec & {
-				input: d.output
-				args: ["cat", "/joel.txt"]
-			}
-		}
+		// 	verify: core.#Exec & {
+		// 		input: d.output
+		// 		args: ["cat", "/joel.txt"]
+		// 	}
+		// }
 
 		readfile: {
 			image: core.#Pull & {

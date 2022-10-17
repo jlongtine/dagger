@@ -2,27 +2,22 @@ package task
 
 import (
 	"context"
-	"errors"
 	"strings"
 
-	"github.com/Khan/genqlient/graphql"
 	bkplatforms "github.com/containerd/containerd/platforms"
-	"go.dagger.io/dagger/engine"
-	"go.dagger.io/dagger/sdk/go/dagger"
 
-	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
 )
 
 func init() {
-	Register("Dockerfile", func() Task { return &dockerfileTask{} })
+	// Register("Dockerfile", func() Task { return &dockerfileTask{} })
 }
 
 type dockerfileTask struct{}
 
-func (t *dockerfileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (t *dockerfileTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	// lg := log.Ctx(ctx)
 	// auths, err := v.Lookup("auth").Fields()
 	// if err != nil {
@@ -42,11 +37,11 @@ func (t *dockerfileTask) Run(ctx context.Context, pctx *plancontext.Context, ect
 	//		s.AddCredentials(target, a.Username, a.Secret.PlainText())
 	//		lg.Debug().Str("target", target).Msg("add target credentials")
 	//	}
-	fsid, err := utils.GetFSId(v.Lookup("source"))
+	// fsid, err := utils.GetFSId(v.Lookup("source"))
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// source, err := pctx.FS.FromValue(v.Lookup("source"))
 	// if err != nil {
@@ -152,53 +147,54 @@ func (t *dockerfileTask) Run(ctx context.Context, pctx *plancontext.Context, ect
 	// 	return nil, fmt.Errorf("failed to unmarshal image config: %w", err)
 	// }
 
-	var filename string
-	if dockerfilePath := v.Lookup("dockerfile.path"); dockerfilePath.Exists() {
-		filename, err = dockerfilePath.String()
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		return nil, errors.New("dockerfile.contents is not implemented")
-	}
+	// var filename string
+	// if dockerfilePath := v.Lookup("dockerfile.path"); dockerfilePath.Exists() {
+	// 	filename, err = dockerfilePath.String()
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// } else {
+	// 	return nil, errors.New("dockerfile.contents is not implemented")
+	// }
 
-	res := struct {
-		Core struct {
-			Filesystem struct {
-				Dockerbuild struct {
-					ID string
-				}
-			}
-		}
-	}{}
+	// res := struct {
+	// 	Core struct {
+	// 		Filesystem struct {
+	// 			Dockerbuild struct {
+	// 				ID string
+	// 			}
+	// 		}
+	// 	}
+	// }{}
 
-	err = ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query ($fsid: FSID!, $dockerfile: String) {
-				core {
-					filesystem(id: $fsid) {
-						dockerbuild(dockerfile: $dockerfile) {
-							id
-						}
-					}
-				}
-			}
-			`,
-			Variables: &map[string]interface{}{
-				"fsid":       fsid,
-				"dockerfile": filename,
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
+	// err = ectx.Client.MakeRequest(ctx,
+	// 	&graphql.Request{
+	// 		Query: `
+	// 		query ($fsid: FSID!, $dockerfile: String) {
+	// 			core {
+	// 				filesystem(id: $fsid) {
+	// 					dockerbuild(dockerfile: $dockerfile) {
+	// 						id
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 		`,
+	// 		Variables: &map[string]interface{}{
+	// 			"fsid":       fsid,
+	// 			"dockerfile": filename,
+	// 		},
+	// 	},
+	// 	&graphql.Response{Data: &res},
+	// )
 
-	fs := utils.NewFS(dagger.FSID(res.Core.Filesystem.Dockerbuild.ID))
+	// fs := utils.NewFS(dagger.FSID(res.Core.Filesystem.Dockerbuild.ID))
 
-	return compiler.NewValue().FillFields(map[string]interface{}{
-		"output": fs,
-		// "config": ConvertImageConfig(image.Config),
-	})
+	// return compiler.NewValue().FillFields(map[string]interface{}{
+	// 	"output": fs,
+	// 	// "config": ConvertImageConfig(image.Config),
+	// })
+	return nil, nil
 }
 
 func (t *dockerfileTask) dockerBuildOpts(v *compiler.Value, pctx *plancontext.Context) (map[string]string, error) {

@@ -3,13 +3,12 @@ package task
 import (
 	"context"
 
-	"github.com/Khan/genqlient/graphql"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
 	"go.dagger.io/dagger/sdk/go/dagger"
+	"go.dagger.io/dagger/sdk/go/dagger/api"
 )
 
 func init() {
@@ -19,7 +18,7 @@ func init() {
 type copyTask struct {
 }
 
-func (t *copyTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (t *copyTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	var err error
 
 	// return nil, err
@@ -94,55 +93,20 @@ func (t *copyTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	// 	return nil, err
 	// }
 
-	res := struct {
-		Core struct {
-			Filesystem struct {
-				Copy struct {
-					Id string
-				}
-			}
-		}
-	}{}
+	// TODO: Filters would be nice! Also... a way to specify where the new directory should go...
+	// Beyond what I've done here.
 
-	err = ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query (
-				$fsid: FSID!
-				$from: FSID!
-				$srcPath: String
-				$destPath: String
-				$include: [String!]
-				$exclude: [String!]
-			) {
-				core {
-					filesystem(id: $fsid) {
-						copy (
-							from: $from
-							srcPath: $srcPath
-							destPath: $destPath
-							include: $include
-							exclude: $exclude
-						) {
-							id
-						}
-					}
-				}
-			}
-			`,
-			Variables: &map[string]interface{}{
-				"fsid":     inputFsid,
-				"from":     contentsFsid,
-				"srcPath":  sourcePath,
-				"destPath": destPath,
-				"include":  filters.Include,
-				"exclude":  filters.Exclude,
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
+	dgr := s.Client.Core()
 
-	fsid := res.Core.Filesystem.Copy.Id
+	sourceDirID, err := dgr.Directory(api.DirectoryOpts{ID: api.DirectoryID(contentsFsid)}).Directory(sourcePath).ID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	fsid, err := dgr.Directory(api.DirectoryOpts{ID: api.DirectoryID(inputFsid)}).WithDirectory(api.DirectoryID(sourceDirID), destPath).ID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	return compiler.NewValue().FillFields(map[string]interface{}{
 		"output": pctx.FS.NewFS(dagger.FSID(fsid)),

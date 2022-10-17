@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Khan/genqlient/graphql"
 	"github.com/docker/distribution/reference"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
+	"go.dagger.io/dagger/sdk/go/dagger/api"
 )
 
 func init() {
@@ -20,7 +19,7 @@ func init() {
 type pushTask struct {
 }
 
-func (c *pushTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (c *pushTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	// lg := log.Ctx(ctx)
 
 	rawDest, err := v.Lookup("dest").String()
@@ -94,37 +93,13 @@ func (c *pushTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	// }
 	// imageRef := fmt.Sprintf("%s@%s", resp.ExporterResponse["image.name"], digest)
 
-	res := struct {
-		Core struct {
-			Filesystem struct {
-				PushImage bool
-			}
-		}
-	}{}
+	dgr := s.Client.Core()
 
-	err = ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query ($fsid: FSID!, $ref: String!) {
-				core {
-					filesystem(id: $fsid) {
-						pushImage(
-							ref: $ref
-						)
-					}
-				}
-			}
-			`,
-			Variables: &map[string]interface{}{
-				"fsid": fsid,
-				"ref":  rawDest,
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
+	// TODO: I need a digest back.
 
-	if err != nil || res.Core.Filesystem.PushImage == false {
-		return nil, fmt.Errorf("Push %s: %w", dest, err)
+	_, err = dgr.Container().WithFS(api.DirectoryID(fsid)).Publish(ctx, api.ContainerAddress(rawDest))
+	if err != nil {
+		return nil, err
 	}
 
 	// Fill result

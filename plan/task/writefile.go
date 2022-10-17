@@ -5,13 +5,12 @@ import (
 	"fmt"
 
 	"cuelang.org/go/cue"
-	"github.com/Khan/genqlient/graphql"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
 	"go.dagger.io/dagger/sdk/go/dagger"
+	"go.dagger.io/dagger/sdk/go/dagger/api"
 )
 
 func init() {
@@ -21,7 +20,7 @@ func init() {
 type writeFileTask struct {
 }
 
-func (t *writeFileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (t *writeFileTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	var str string
 	var err error
 
@@ -58,44 +57,17 @@ func (t *writeFileTask) Run(ctx context.Context, pctx *plancontext.Context, ectx
 		return nil, err
 	}
 
-	res := struct {
-		Core struct {
-			Filesystem struct {
-				WriteFile struct {
-					ID string
-				}
-			}
-		}
-	}{}
+	dgr := s.Client.Core()
 
-	err = ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query ($fsid: FSID!, $contents: String!, $path: String!) {
-				core {
-					filesystem(id: $fsid) {
-						writeFile(
-							contents: $contents
-							path: $path
-						) {
-							id
-						}
-					}
-				}
-			}
-			`,
-			Variables: &map[string]interface{}{
-				"fsid":     fsid,
-				"contents": str,
-				"path":     path,
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
+	newFSID, err := dgr.Directory(api.DirectoryOpts{ID: api.DirectoryID(fsid)}).WithNewFile(path, api.DirectoryWithNewFileOpts{
+		Contents: str,
+	}).ID(ctx)
 
-	outputFS := utils.NewFS(dagger.FSID(res.Core.Filesystem.WriteFile.ID))
+	if err != nil {
+		return nil, err
+	}
 
 	return compiler.NewValue().FillFields(map[string]interface{}{
-		"output": outputFS,
+		"output": utils.NewFS(dagger.FSID(newFSID)),
 	})
 }

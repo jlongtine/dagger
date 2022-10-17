@@ -19,7 +19,7 @@ func init() {
 type clientEnvTask struct {
 }
 
-func (t clientEnvTask) Run(ctx context.Context, pctx *plancontext.Context, _ *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (t clientEnvTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	log.Ctx(ctx).Debug().Msg("loading environment variables")
 
 	fields, err := v.Fields(cue.Optional(true))
@@ -33,7 +33,36 @@ func (t clientEnvTask) Run(ctx context.Context, pctx *plancontext.Context, _ *so
 			continue
 		}
 		envvar := field.Label()
-		val, err := t.getEnv(envvar, field.Value, field.IsOptional, pctx)
+		// val, err := t.getEnv(envvar, field.Value, field.IsOptional, pctx, s)
+
+		val, hasDefault := field.Value.Default()
+
+		env, hasEnv := os.LookupEnv(envvar)
+		if !hasEnv {
+			if field.IsOptional || hasDefault {
+				// Ignore unset var if it's optional
+				return nil, nil
+			}
+			return nil, fmt.Errorf("environment variable %q not set", envvar)
+		}
+
+		if plancontext.IsSecretValue(val) {
+			dgr := s.Client.Core().Host().Variable(envvar).Secret().ID()
+			secret := pctx.Secrets.New(env)
+			return secret.MarshalCUE(), nil
+		}
+
+		if !hasDefault && val.IsConcrete() {
+			return nil, fmt.Errorf("%s: unexpected concrete value, please use a type or set a default", envvar)
+		}
+
+		k := val.IncompleteKind()
+		if k == cue.StringKind {
+			return env, nil
+		}
+
+		return nil, fmt.Errorf("%s: unsupported type %q", envvar, k)
+
 		if err != nil {
 			return nil, err
 		}
@@ -45,7 +74,7 @@ func (t clientEnvTask) Run(ctx context.Context, pctx *plancontext.Context, _ *so
 	return compiler.NewValue().FillFields(envs)
 }
 
-func (t clientEnvTask) getEnv(envvar string, v *compiler.Value, isOpt bool, pctx *plancontext.Context) (interface{}, error) {
+func (t clientEnvTask) getEnv(envvar string, v *compiler.Value, isOpt bool, pctx *plancontext.Context, s *solver.Solver) (interface{}, error) {
 	// Resolve default in disjunction if a type hasn't been specified
 	val, hasDefault := v.Default()
 
@@ -59,6 +88,7 @@ func (t clientEnvTask) getEnv(envvar string, v *compiler.Value, isOpt bool, pctx
 	}
 
 	if plancontext.IsSecretValue(val) {
+		dgr := s.Client.Core().Host().Variable(envvar).Secret().ID()
 		secret := pctx.Secrets.New(env)
 		return secret.MarshalCUE(), nil
 	}

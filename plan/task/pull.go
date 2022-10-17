@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Khan/genqlient/graphql"
 	"github.com/docker/distribution/reference"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
 	"go.dagger.io/dagger/sdk/go/dagger"
+	"go.dagger.io/dagger/sdk/go/dagger/api"
 )
 
 func init() {
@@ -21,7 +20,7 @@ func init() {
 type pullTask struct {
 }
 
-func (c *pullTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (c *pullTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	// lg := log.Ctx(ctx)
 
 	rawRef, err := v.Lookup("source").String()
@@ -115,67 +114,16 @@ func (c *pullTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *eng
 	// 	return nil, err
 	// }
 
-	// resp := &graphql.Response{}
+	dgr := s.Client.Core()
 
-	// err = ectx.Client.MakeRequest(ctx, &graphql.Request{Query: `
-	// query {
-	// 		core {
-	// 			image(ref: "alpine") {
-	// 				exec(input: {
-	// 					args: ["echo", "hello world"]
-	// 					workdir: ""
-	// 					env: [{
-	// 						name: "JOEL"
-	// 						value: "joel"
-	// 					}]
-	// 				}) {
-	// 					exitCode
-	// 					fs {
-	// 						id
-	// 					}
-	// 					stderr
-	// 					stdout
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// `}, resp)
-	// fmt.Println("Query response:", resp.Data)
-
-	res := struct {
-		Core struct {
-			Image struct {
-				Id string
-			}
-		}
-	}{}
-
-	err = ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query ($ref: String!){
-				core {
-					image(ref: $ref) {
-						id
-					}
-				}
-			}
-			`,
-			Variables: &map[string]string{
-				"ref": ref.String(),
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
-
-	// ir, err := core.Image(ectx, rawRef)
-	fs := res.Core.Image
-
-	// fs := pctx.FS.New(result)
+	fsid, err := dgr.Container().From(api.ContainerAddress(rawRef)).FS().ID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// return val, err
 	return compiler.NewValue().FillFields(map[string]interface{}{
-		"output": utils.NewFS(dagger.FSID(fs.Id)),
+		"output": utils.NewFS(dagger.FSID(fsid)),
 		// "digest": digest,
 		// "config": ConvertImageConfig(image.Config),
 	})

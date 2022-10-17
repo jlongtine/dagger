@@ -18,13 +18,11 @@ import (
 	cueflow "cuelang.org/go/tools/flow"
 
 	"github.com/rs/zerolog/log"
-	"go.dagger.io/dagger/engine"
 	"go.opentelemetry.io/otel"
 )
 
 type Runner struct {
 	pctx     *plancontext.Context
-	ectx     *engine.Context
 	target   cue.Path
 	s        *solver.Solver
 	tasks    sync.Map
@@ -187,7 +185,7 @@ func (r *Runner) taskFunc(flowVal cue.Value) (cueflow.Runner, error) {
 		}
 
 		start := time.Now()
-		result, err := handler.Run(ctx, r.pctx, r.ectx, r.s, compiler.Wrap(t.Value()))
+		result, err := handler.Run(ctx, r.pctx, r.s, compiler.Wrap(t.Value()))
 		if err != nil {
 			// FIXME: this should use errdefs.IsCanceled(err)
 			if strings.Contains(err.Error(), "context canceled") {

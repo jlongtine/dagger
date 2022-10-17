@@ -19,6 +19,7 @@ import (
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/rs/zerolog/log"
 	"go.dagger.io/dagger-classic/plancontext"
+	"go.dagger.io/dagger/sdk/go/dagger"
 )
 
 type Solver struct {
@@ -30,6 +31,7 @@ type Solver struct {
 
 	containers   map[string]*container
 	containersMu sync.RWMutex
+	Client       *dagger.Client
 }
 
 type Opts struct {

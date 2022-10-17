@@ -11,7 +11,6 @@ import (
 	"go.dagger.io/dagger-classic/pkg"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	cloakengine "go.dagger.io/dagger/engine"
 )
 
 var (
@@ -70,7 +69,7 @@ const (
 type NewFunc func() Task
 
 type Task interface {
-	Run(ctx context.Context, pctx *plancontext.Context, ectx *cloakengine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error)
+	Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error)
 }
 
 type PreRunner interface {

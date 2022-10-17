@@ -27,7 +27,7 @@ import "dagger.io/dagger"
 	workdir: string | *"/"
 
 	// User ID or name
-	user: string | *"root:root" @cloak(notimplemented)
+	user: string | *"root:root"
 
 	// If set, always execute even if the operation could be cached
 	always: true | *false @cloak(notimplemented)
@@ -56,7 +56,7 @@ import "dagger.io/dagger"
 		type:     "cache"
 		contents: #CacheDir
 	} | {
-		type:     "tmp" @cloak(notimplemented)
+		type:     "tmp"
 		contents: #TempDir
 	} | {
 		type:     "socket" @cloak(notimplemented)
@@ -64,18 +64,18 @@ import "dagger.io/dagger"
 	} | {
 		type:     "fs"
 		contents: dagger.#FS
-		source?:  string        @cloak(notimplemented)
+		source?:  string
 		ro?:      true | *false @cloak(notimplemented)
 	} | {
-		type:     "secret" @cloak(notimplemented)
+		type:     "secret"
 		contents: dagger.#Secret
-		uid:      int | *0
-		gid:      int | *0
-		mask:     int | *0o400
+		uid:      int | *0     @cloak(notimplemented)
+		gid:      int | *0     @cloak(notimplemented)
+		mask:     int | *0o400 @cloak(notimplemented)
 	} | {
-		type:        "file" @cloak(notimplemented)
+		type:        "file"
 		contents:    string
-		permissions: *0o644 | int
+		permissions: *0o644 | int @cloak(notimplemented)
 	}
 }
 

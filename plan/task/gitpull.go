@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Khan/genqlient/graphql"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
 	"go.dagger.io/dagger/sdk/go/dagger"
 )
 
@@ -19,7 +17,7 @@ func init() {
 type gitPullTask struct {
 }
 
-func (c *gitPullTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *engine.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
+func (c *gitPullTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver.Solver, v *compiler.Value) (*compiler.Value, error) {
 	var gitPull struct {
 		Remote     string
 		Ref        string
@@ -82,14 +80,6 @@ func (c *gitPullTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *
 
 	// gitOpts = append(gitOpts, withCustomName(v, "GitPull %s@%s", remoteRedacted, gitPull.Ref))
 
-	res := struct {
-		Core struct {
-			Git struct {
-				Id string
-			}
-		}
-	}{}
-
 	// st := llb.Git(gitPull.Remote, gitPull.Ref, gitOpts...)
 
 	// result, err := s.Solve(ctx, st, pctx.Platform.Get())
@@ -97,34 +87,15 @@ func (c *gitPullTask) Run(ctx context.Context, pctx *plancontext.Context, ectx *
 	// 	return nil, err
 	// }
 
-	err := ectx.Client.MakeRequest(ctx,
-		&graphql.Request{
-			Query: `
-			query ($remote: String!, $ref: String) {
-				core {
-					git(
-						remote: $remote, 
-						ref: $ref
-					) {
-						id
-					}
-				}
-			}
-			`,
-			Variables: &map[string]string{
-				"remote": gitPull.Remote,
-				"ref":    gitPull.Ref,
-			},
-		},
-		&graphql.Response{Data: &res},
-	)
+	core := s.Client.Core()
+
+	// TODO: How should I differentiate between branches and tags?
+	fsid, err := core.Git(gitPull.Remote).Branch(gitPull.Ref).Tree().ID(ctx)
 
 	if err != nil {
-		fmt.Println("gitpull", err)
 		return nil, err
 	}
 
-	fsid := res.Core.Git.Id
 	return compiler.NewValue().FillFields(map[string]interface{}{
 		"output": pctx.FS.NewFS(dagger.FSID(fsid)),
 	})

@@ -12,12 +12,13 @@ import (
 	"cuelang.org/go/cue"
 	cueflow "cuelang.org/go/tools/flow"
 	"github.com/rs/zerolog/log"
+
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/pkg"
 	"go.dagger.io/dagger-classic/plan/task"
 	"go.dagger.io/dagger-classic/plancontext"
 	"go.dagger.io/dagger-classic/solver"
-	"go.dagger.io/dagger/engine"
+	"go.dagger.io/dagger/sdk/go/dagger"
 	"go.opentelemetry.io/otel"
 )
 
@@ -219,19 +220,21 @@ func (p *Plan) Do(ctx context.Context, path cue.Path, s *solver.Solver) error {
 	ctx, span := otel.Tracer("dagger").Start(ctx, "plan.Do")
 	defer span.End()
 
-	if err := engine.Start(ctx, &engine.Config{}, func(ctx engine.Context) error {
-		r := NewRunner(p.context, path, s, p.config.DryRun)
-		r.ectx = &ctx
-		final, err := r.Run(ctx, p.source)
-		if err != nil {
-			return err
-		}
+	client, err := dagger.Connect(ctx)
 
-		p.final = final
-		return nil
-	}); err != nil {
-		panic(err)
+	if err != nil {
+		return err
 	}
+	defer client.Close()
+	s.Client = client
+
+	r := NewRunner(p.context, path, s, p.config.DryRun)
+	final, err := r.Run(ctx, p.source)
+	if err != nil {
+		return err
+	}
+
+	p.final = final
 
 	return nil
 }
