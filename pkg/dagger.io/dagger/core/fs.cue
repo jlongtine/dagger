@@ -12,9 +12,9 @@ import "dagger.io/dagger"
 	// Relative path to source.
 	path: string
 	// Optionally include certain files
-	include: [...string]
+	include: [...string] @cloak(notimplemented)
 	// Optionally exclude certain files
-	exclude: [...string]
+	exclude: [...string] @cloak(notimplemented)
 
 	output: dagger.#FS @dagger(generated)
 }
@@ -64,7 +64,7 @@ import "dagger.io/dagger"
 	// Contents to write
 	contents: string
 	// Permissions of the file
-	permissions: *0o644 | int
+	permissions: *0o644 | int @cloak(notimplemented)
 	// Output filesystem tree
 	output: dagger.#FS @dagger(generated)
 }
@@ -109,7 +109,7 @@ import "dagger.io/dagger"
 
 	// Allow wildcard selection
 	// Default to: true
-	allowWildcard: *true | bool
+	allowWildcard: *true | bool @cloak(notimplemented)
 
 	// Output filesystem tree
 	output: dagger.#FS @dagger(generated)

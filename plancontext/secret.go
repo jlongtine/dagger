@@ -7,6 +7,7 @@ import (
 	"cuelang.org/go/cue"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/pkg"
+	"go.dagger.io/dagger/sdk/go/dagger/api"
 )
 
 var (
@@ -57,6 +58,14 @@ func (c *secretContext) New(plaintext string) *Secret {
 	defer c.l.Unlock()
 
 	c.store[secret.id] = secret
+	return secret
+}
+
+func (c *secretContext) NewFromID(secretid api.SecretID) *Secret {
+	secret := &Secret{
+		id: string(secretid),
+	}
+
 	return secret
 }
 

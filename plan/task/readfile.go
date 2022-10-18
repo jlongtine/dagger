@@ -35,8 +35,6 @@ func (t *readFileTask) Run(ctx context.Context, pctx *plancontext.Context, s *so
 
 	file, err := dgr.Directory(api.DirectoryOpts{ID: api.DirectoryID(fsid)}).File(path).Contents(ctx)
 
-	// FIXME: we should create an intermediate image containing only `path`.
-	// That way, on cache misses, we'll only download the layer with the file contents rather than the entire FS.
 	if err != nil {
 		return nil, fmt.Errorf("ReadFile %s: %w", path, err)
 	}

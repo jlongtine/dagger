@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	// Register("ClientEnv", func() Task { return &clientEnvTask{} })
+	Register("ClientEnv", func() Task { return &clientEnvTask{} })
 }
 
 type clientEnvTask struct {
@@ -38,69 +38,28 @@ func (t clientEnvTask) Run(ctx context.Context, pctx *plancontext.Context, s *so
 		val, hasDefault := field.Value.Default()
 
 		env, hasEnv := os.LookupEnv(envvar)
-		if !hasEnv {
-			if field.IsOptional || hasDefault {
-				// Ignore unset var if it's optional
-				return nil, nil
-			}
+
+		switch {
+		case !hasEnv && !field.IsOptional && !hasDefault:
 			return nil, fmt.Errorf("environment variable %q not set", envvar)
-		}
-
-		if plancontext.IsSecretValue(val) {
-			dgr := s.Client.Core().Host().Variable(envvar).Secret().ID()
-			secret := pctx.Secrets.New(env)
-			return secret.MarshalCUE(), nil
-		}
-
-		if !hasDefault && val.IsConcrete() {
+		case plancontext.IsSecretValue(val):
+			{
+				secretid, err := s.Client.Core().Host().Variable(envvar).Secret().ID(ctx)
+				if err != nil {
+					return nil, err
+				}
+				secret := pctx.Secrets.NewFromID(secretid)
+				envs[envvar] = secret
+			}
+		case !hasDefault && val.IsConcrete():
 			return nil, fmt.Errorf("%s: unexpected concrete value, please use a type or set a default", envvar)
+		case val.IncompleteKind() == cue.StringKind:
+			envs[envvar] = env
+		default:
+			return nil, fmt.Errorf("%s: unsupported type %q", envvar, val.IncompleteKind())
 		}
 
-		k := val.IncompleteKind()
-		if k == cue.StringKind {
-			return env, nil
-		}
-
-		return nil, fmt.Errorf("%s: unsupported type %q", envvar, k)
-
-		if err != nil {
-			return nil, err
-		}
-		if val != nil {
-			envs[envvar] = val
-		}
 	}
 
 	return compiler.NewValue().FillFields(envs)
-}
-
-func (t clientEnvTask) getEnv(envvar string, v *compiler.Value, isOpt bool, pctx *plancontext.Context, s *solver.Solver) (interface{}, error) {
-	// Resolve default in disjunction if a type hasn't been specified
-	val, hasDefault := v.Default()
-
-	env, hasEnv := os.LookupEnv(envvar)
-	if !hasEnv {
-		if isOpt || hasDefault {
-			// Ignore unset var if it's optional
-			return nil, nil
-		}
-		return nil, fmt.Errorf("environment variable %q not set", envvar)
-	}
-
-	if plancontext.IsSecretValue(val) {
-		dgr := s.Client.Core().Host().Variable(envvar).Secret().ID()
-		secret := pctx.Secrets.New(env)
-		return secret.MarshalCUE(), nil
-	}
-
-	if !hasDefault && val.IsConcrete() {
-		return nil, fmt.Errorf("%s: unexpected concrete value, please use a type or set a default", envvar)
-	}
-
-	k := val.IncompleteKind()
-	if k == cue.StringKind {
-		return env, nil
-	}
-
-	return nil, fmt.Errorf("%s: unsupported type %q", envvar, k)
 }

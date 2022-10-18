@@ -3,7 +3,6 @@ package task
 import (
 	"context"
 
-	"github.com/moby/buildkit/client/llb"
 	"go.dagger.io/dagger-classic/cloak/utils"
 	"go.dagger.io/dagger-classic/compiler"
 	"go.dagger.io/dagger-classic/plancontext"
@@ -39,18 +38,18 @@ func (t *mkdirTask) Run(ctx context.Context, pctx *plancontext.Context, s *solve
 	// }
 
 	// Retrieve options
-	mkdirOpts := []llb.MkdirOption{}
-	var opts struct {
-		Parents bool
-	}
+	// mkdirOpts := []llb.MkdirOption{}
+	// var opts struct {
+	// 	Parents bool
+	// }
 
-	if err := v.Decode(&opts); err != nil {
-		return nil, err
-	}
+	// if err := v.Decode(&opts); err != nil {
+	// 	return nil, err
+	// }
 
-	if opts.Parents {
-		mkdirOpts = append(mkdirOpts, llb.WithParents(true))
-	}
+	// if opts.Parents {
+	// 	mkdirOpts = append(mkdirOpts, llb.WithParents(true))
+	// }
 
 	inputFsid, err := utils.GetFSId(v.Lookup("input"))
 

@@ -80,6 +80,8 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver
 		}
 	}
 
+	// TODO: Finish implementing mount types.
+
 	for _, m := range common.mounts {
 		switch {
 		case m.cacheMount != nil:
