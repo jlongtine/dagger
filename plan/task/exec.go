@@ -95,13 +95,19 @@ func (t *execTask) Run(ctx context.Context, pctx *plancontext.Context, s *solver
 			// case llb.CacheMountLocked:
 			// 	sharingMode = "locked"
 			// }
-
 			ctr = ctr.WithMountedCache(api.CacheID(m.cacheMount.id), m.dest)
-		// case m.tmpMount != nil:
+		case m.tmpMount != nil:
+			ctr = ctr.WithMountedTemp(m.dest)
 		case m.fsMount != nil:
 			ctr = ctr.WithMountedDirectory(m.dest, api.DirectoryID(m.fsMount.fsid))
-		// case m.secretMount != nil:
-		// case m.fileMount != nil:
+		case m.secretMount != nil:
+			ctr = ctr.WithMountedSecret(m.dest, api.SecretID(m.secretMount.id))
+		case m.fileMount != nil:
+			fileid, err := dgr.Directory().WithNewFile("/file", api.DirectoryWithNewFileOpts{Contents: m.fileMount.contents}).File("/file").ID(ctx)
+			if err != nil {
+				return nil, err
+			}
+			ctr = ctr.WithMountedFile(m.dest, fileid)
 		default:
 		}
 	}
