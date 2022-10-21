@@ -3,45 +3,45 @@ package dagger
 // A special kind of program which `dagger` can execute.
 #Plan: {
 	// Access client machine
-	// client: {
-	// 	// Access client filesystem
-	// 	// Path may be absolute, or relative to client working directory
-	// 	filesystem: [path=string]: {
-	// 		// Read data from that path
-	// 		read?: _#clientFilesystemRead & {
-	// 			"path": string | *path
-	// 		}
+	client: {
+		// Access client filesystem
+		// Path may be absolute, or relative to client working directory
+		filesystem: [path=string]: {
+			// Read data from that path
+			read?: _#clientFilesystemRead & {
+				"path": string | *path
+			}
 
-	// 		// If set, Write to that path
-	// 		write?: _#clientFilesystemWrite & {
-	// 			"path": string | *path
+			// If set, Write to that path
+			write?: _#clientFilesystemWrite & {
+				"path": string | *path
 
-	// 			// if we read and write to the same path, under the same key,
-	// 			// assume we want to make an update
-	// 			if (read.path & write.path) != _|_ {
-	// 				_after: read
-	// 			}
-	// 		}
-	// 	}
+				// if we read and write to the same path, under the same key,
+				// assume we want to make an update
+				if (read.path & write.path) != _|_ {
+					_after: read
+				}
+			}
+		}
 
-	// 	// Access client network endpoints
-	// 	network: [address=string]: _#clientNetwork & {
-	// 		"address": _#address | *address
-	// 	}
+		// Access client network endpoints
+		network: [address=string]: _#clientNetwork & {
+			"address": _#address | *address
+		}
 
-	// 	// Access client environment variables
-	// 	env: _#clientEnv
+		// Access client environment variables
+		env: _#clientEnv
 
-	// 	// Execute commands in the client
-	// 	commands: [id=string]: _#clientCommand
+		// Execute commands in the client
+		commands: [id=string]: _#clientCommand
 
-	// 	// Platform of the client machine
-	// 	platform: _#clientPlatform
-	// }
+		// Platform of the client machine
+		platform: _#clientPlatform
+	}
 
 	// Configure platform execution
 	// FIXME: temporarily disabled
-	// platform?: string
+	platform?: string
 
 	// Execute actions in containers
 	actions: _

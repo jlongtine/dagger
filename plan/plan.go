@@ -220,7 +220,18 @@ func (p *Plan) Do(ctx context.Context, path cue.Path, s *solver.Solver) error {
 	ctx, span := otel.Tracer("dagger").Start(ctx, "plan.Do")
 	defer span.End()
 
-	client, err := dagger.Connect(ctx)
+	clientOpts := []dagger.ClientOpt{}
+
+	paths, err := p.context.LocalDirs.Paths()
+	if err != nil {
+		return err
+	}
+
+	for id, path := range paths {
+		clientOpts = append(clientOpts, dagger.WithLocalDir(id, path))
+	}
+
+	client, err := dagger.Connect(ctx, clientOpts...)
 
 	if err != nil {
 		return err
