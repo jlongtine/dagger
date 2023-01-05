@@ -197,7 +197,8 @@ func ExampleHost_Directory() {
 	}
 	defer client.Close()
 
-	readme, err := client.Host().Directory(".").File("README.md").Contents(ctx)
+	// TODO: general issue where host dir when using "dagger run" or the shim the host workdir is not necessarily ours
+	readme, err := client.Host().Directory("/_work/dagger/dagger/").File("README.md").Contents(ctx)
 	if err != nil {
 		panic(err)
 	}

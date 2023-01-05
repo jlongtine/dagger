@@ -20,6 +20,7 @@ import (
 const (
 	daggerCliBinName = "dagger"
 	shimBinName      = "dagger-shim"
+	runnerBinName    = "dagger-runner"
 	buildkitRepo     = "github.com/moby/buildkit"
 	buildkitBranch   = "v0.11.0-rc3"
 )
@@ -208,6 +209,8 @@ func (t Engine) Dev(ctx context.Context) error {
 		"-d",
 		"--rm",
 		"-v", volumeName+":/var/lib/buildkit",
+		"-e", "GHA_ACTIONS_TOKEN",
+		"-e", "GHA_ACTIONS_REPO",
 		"--name", util.TestContainerName,
 		"--privileged",
 		imageName,
@@ -248,14 +251,27 @@ func devEngineContainer(c *dagger.Client, arches []string) []*dagger.Container {
 				"/app/cmd/shim",
 			}).
 			File("./bin/" + shimBinName)
-		//nolint
-		buildkitBase = buildkitBase.WithRootfs(
-			buildkitBase.Rootfs().WithFile("/usr/bin/"+shimBinName, shimBin),
+
+		// build the runner binary
+		runnerBin := util.GoBase(c).
+			WithEnvVariable("GOOS", "linux").
+			WithEnvVariable("GOARCH", arch).
+			WithExec([]string{
+				"go", "build",
+				"-o", "./bin/" + runnerBinName,
+				"-ldflags", "-s -w",
+				"/app/cmd/runner",
+			}).
+			File("./bin/" + runnerBinName)
+
+		buildkitBase = buildkitBase.WithRootfs(buildkitBase.Rootfs().
+			WithFile("/usr/bin/"+shimBinName, shimBin).
+			WithFile("/usr/bin/"+runnerBinName, runnerBin),
 		)
 
 		// setup entrypoint
 		buildkitBase = buildkitBase.WithEntrypoint([]string{
-			"buildkitd",
+			"/usr/bin/" + runnerBinName,
 			"--oci-worker-binary", "/usr/bin/" + shimBinName,
 		})
 
