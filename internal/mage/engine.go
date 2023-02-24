@@ -100,6 +100,11 @@ func init() {
 	engineEntrypoint = buf.String()
 }
 
+var engineToml = fmt.Sprintf(`root = %q
+[registry."docker.io"]
+  mirrors = ["mirror.gcr.io"]
+`, engineDefaultStateDir)
+
 var publishedEngineArches = []string{"amd64", "arm64"}
 
 func parseRef(tag string) error {
@@ -256,6 +261,7 @@ func (t Engine) test(ctx context.Context, race bool) error {
 		WithMountedDirectory("/app", util.Repository(c)). // need all the source for extension tests
 		WithWorkdir("/app").
 		WithEnvVariable("CGO_ENABLED", cgoEnabledEnv).
+		WithEnvVariable("_EXPERIMENTAL_DAGGER_CACHE_CONFIG", os.Getenv("_EXPERIMENTAL_DAGGER_CACHE_CONFIG")).
 		WithMountedDirectory("/root/.docker", util.HostDockerDir(c)).
 		WithExec(args).
 		Stdout(ctx)
@@ -331,6 +337,23 @@ func (t Engine) Dev(ctx context.Context) error {
 		return fmt.Errorf("docker rm: %w: %s", err, output)
 	}
 
+	manifestsPrefix := "manifests_prefix=manifests/"
+	_, ci := os.LookupEnv("CI")
+	if ci {
+		refName, set := os.LookupEnv("GITHUB_REF_NAME")
+		if set {
+			manifestsPrefix = manifestsPrefix + "gha-dev-engine-" + refName + "/"
+		}
+		jobName, set := os.LookupEnv("GITHUB_JOB")
+		if set {
+			manifestsPrefix = manifestsPrefix + "gha-dev-engine-" + jobName + "/"
+		}
+	}
+
+	cacheConfig := cacheConfigEnvName + "=" + "type=experimental_dagger_s3,mode=max,region=us-east-2,bucket=eks-buildkit-cache-test," + manifestsPrefix
+
+	fmt.Println(cacheConfig)
+
 	runArgs := []string{
 		"run",
 		"-d",
@@ -338,6 +361,10 @@ func (t Engine) Dev(ctx context.Context) error {
 		"-e", cacheConfigEnvName,
 		"-e", servicesDNSEnvName,
 		"-v", volumeName + ":" + engineDefaultStateDir,
+		"-v", "/var/run/secrets/eks.amazonaws.com/serviceaccount/token:/var/run/secrets/eks.amazonaws.com/serviceaccount/token",
+		"-e", "AWS_ROLE_ARN",
+		"-e", "AWS_WEB_IDENTITY_TOKEN_FILE",
+		"-e", cacheConfig,
 		"--name", util.EngineContainerName,
 		"--privileged",
 	}

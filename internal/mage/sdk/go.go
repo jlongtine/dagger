@@ -61,6 +61,7 @@ func (t Go) Test(ctx context.Context) error {
 	output, err := util.GoBase(c).
 		WithWorkdir("sdk/go").
 		WithMountedDirectory("/root/.docker", util.HostDockerDir(c)).
+		WithEnvVariable("_EXPERIMENTAL_DAGGER_CACHE_CONFIG", os.Getenv("_EXPERIMENTAL_DAGGER_CACHE_CONFIG")).
 		WithExec([]string{"go", "test", "-v", "./..."}).
 		Stdout(ctx)
 	if err != nil {

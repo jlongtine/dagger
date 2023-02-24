@@ -19,8 +19,12 @@ permissions:
 
 jobs:
   engine:
-    runs-on: ubuntu-22.04-16c-64g-600gb
+    runs-on: self-hosted
     steps:
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: "Set up QEMU"
         run: |
           docker run --rm --privileged tonistiigi/binfmt:latest --install all
@@ -83,8 +87,12 @@ jobs:
   #
   # Run in parallel to the regular tests so that the entire pipeline finishes quicker
   engine-race-detection:
-    runs-on: ubuntu-22.04-16c-64g-600gb
+    runs-on: self-hosted
     steps:
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
@@ -111,13 +119,19 @@ jobs:
 
   sdk-go:
     name: "sdk / go"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
       - run: ./hack/make sdk:go:test
+      - run: docker logs dagger-engine.dev
+        if: always()
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
@@ -131,13 +145,19 @@ jobs:
 
   sdk-python:
     name: "sdk / python"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
       - run: ./hack/make sdk:python:test
+      - run: docker logs dagger-engine.dev
+        if: always()
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
@@ -151,13 +171,19 @@ jobs:
 
   sdk-nodejs:
     name: "sdk / nodejs"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
       - run: ./hack/make sdk:nodejs:test
+      - run: docker logs dagger-engine.dev
+        if: always()
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
