@@ -22,6 +22,5 @@ docker ps
 
 export _EXPERIMENTAL_DAGGER_CLI_BIN=bin/dagger
 export _EXPERIMENTAL_DAGGER_RUNNER_HOST="docker-container://dagger-engine.dev"
-export _EXPERIMENTAL_DAGGER_CACHE_CONFIG="type=experimental_dagger_s3,mode=max,region=us-east-2,bucket=eks-buildkit-cache-test,manifests_prefix=manifests/gha-dev-$GITHUB_REF_NAME/gha-dev-$GITHUB_JOB/"
 
 go run main.go -w "$DAGGER_SRC_ROOT" "$@"
