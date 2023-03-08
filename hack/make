@@ -2,25 +2,10 @@
 
 set -e -u -x
 
-DAGGER_CLI_COMMIT="6ffc131f6a3fe03d573586e12eb19226f2a8f41f"
-DAGGER_ENGINE_SHA="26e5fbf7d6d18254ea9ff5b6bc6ad36ffef9d8011771d522a3a485fe3fbcf11d"
-DAGGER_ENGINE_DIGEST="sha256:$DAGGER_ENGINE_SHA"
+export _EXPERIMENTAL_DAGGER_RUNNER_HOST="unix:///var/run/buildkit/buildkitd.sock"
+DAGGER_CLI_COMMIT="4e9e5451565fe80778917f05ab88ba9ba32b7c91"
 DAGGER_TMP_BINDIR="/tmp/dagger_${DAGGER_CLI_COMMIT}"
-
 export _EXPERIMENTAL_DAGGER_CLI_BIN="$DAGGER_TMP_BINDIR/dagger"
-export _EXPERIMENTAL_DAGGER_RUNNER_HOST="docker-container://dagger-engine-$DAGGER_ENGINE_SHA"
-
-export _EXPERIMENTAL_DAGGER_CACHE_CONFIG="type=experimental_dagger_s3,mode=max,region=us-east-2,bucket=eks-buildkit-cache-test,manifests_prefix=manifests/gh-$GITHUB_REF_NAME/gh-$GITHUB_JOB/"
-
-echo $AWS_ROLE_ARN
-echo $AWS_WEB_IDENTITY_TOKEN_FILE
-
-docker run --name "dagger-engine-$DAGGER_ENGINE_SHA" -d --restart always -e _EXPERIMENTAL_DAGGER_CACHE_CONFIG \
-  -e AWS_ROLE_ARN -e AWS_WEB_IDENTITY_TOKEN_FILE \
-  -v $AWS_WEB_IDENTITY_TOKEN_FILE:$AWS_WEB_IDENTITY_TOKEN_FILE \
-  -v "/var/lib/dagger" --privileged "ghcr.io/dagger/engine@${DAGGER_ENGINE_DIGEST}" --debug
-
-# Download dagger nightly
 if [ ! -f  "$_EXPERIMENTAL_DAGGER_CLI_BIN" ]; then
     mkdir -p "$DAGGER_TMP_BINDIR"
     curl "https://dl.dagger.io/dagger/main/${DAGGER_CLI_COMMIT}/dagger_${DAGGER_CLI_COMMIT}_$(uname -s | tr A-Z a-z)_$(uname -m | sed s/x86_64/amd64/).tar.gz" | tar xvz -C "$DAGGER_TMP_BINDIR"
