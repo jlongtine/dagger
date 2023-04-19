@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   engine:
-    runs-on: ubuntu-22.04-16c-64g-600gb
+    runs-on: self-hosted
     steps:
       - name: "Set up QEMU"
         run: |
@@ -32,6 +32,7 @@ jobs:
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
+          _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
       - name: "ALWAYS print kernel logs - especialy useful on failure"
         if: always()
         run: sudo dmesg
@@ -80,7 +81,7 @@ jobs:
   #
   # Run in parallel to the regular tests so that the entire pipeline finishes quicker
   engine-race-detection:
-    runs-on: ubuntu-22.04-16c-64g-600gb
+    runs-on: self-hosted
     steps:
       - uses: actions/setup-go@v3
         with:
@@ -92,6 +93,7 @@ jobs:
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
+          _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
       - name: "ALWAYS print kernel logs - especialy useful on failure"
         if: always()
         run: sudo dmesg
@@ -105,7 +107,7 @@ jobs:
 
   sdk-go:
     name: "sdk / go"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -115,6 +117,7 @@ jobs:
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
+          _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
       - uses: actions/upload-artifact@v3
         if: always()
         name: "Upload journal.log"
@@ -125,7 +128,7 @@ jobs:
 
   sdk-python:
     name: "sdk / python"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -135,6 +138,7 @@ jobs:
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
+          _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
       - uses: actions/upload-artifact@v3
         if: always()
         name: "Upload journal.log"
@@ -145,7 +149,7 @@ jobs:
 
   sdk-nodejs:
     name: "sdk / nodejs"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -155,6 +159,7 @@ jobs:
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
+          _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
       - uses: actions/upload-artifact@v3
         if: always()
         name: "Upload journal.log"
