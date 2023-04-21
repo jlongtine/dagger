@@ -28,11 +28,19 @@ jobs:
         with:
           go-version: "1.20"
       - uses: actions/checkout@v3
-      - run: ./hack/make engine:test
+      - run: |
+          DAGGER_TMP_BINDIR="/tmp/dagger_${DAGGER_CLI_COMMIT}"
+          export _EXPERIMENTAL_DAGGER_CLI_BIN="$DAGGER_TMP_BINDIR/dagger"
+          if [ ! -f  "$_EXPERIMENTAL_DAGGER_CLI_BIN" ]; then
+              mkdir -p "$DAGGER_TMP_BINDIR"
+              curl "https://dl.dagger.io/dagger/main/${DAGGER_CLI_COMMIT}/dagger_${DAGGER_CLI_COMMIT}_$(uname -s | tr A-Z a-z)_$(uname -m | sed s/x86_64/amd64/).tar.gz" | tar xvz -C "$DAGGER_TMP_BINDIR"
+          fi
+          ./hack/make engine:test
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
           _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
+          DAGGER_CLI_COMMIT: "48fb31df3c383da743c9cba5723f4291e0e6f8df"
       - name: "ALWAYS print kernel logs - especialy useful on failure"
         if: always()
         run: sudo dmesg
@@ -89,11 +97,19 @@ jobs:
       - uses: actions/checkout@v3
       - run: ./hack/make engine:build
       - run: echo $PWD/bin >> $GITHUB_PATH
-      - run: ./hack/make engine:testrace
+      - run: |
+          DAGGER_TMP_BINDIR="/tmp/dagger_${DAGGER_CLI_COMMIT}"
+          export _EXPERIMENTAL_DAGGER_CLI_BIN="$DAGGER_TMP_BINDIR/dagger"
+          if [ ! -f  "$_EXPERIMENTAL_DAGGER_CLI_BIN" ]; then
+              mkdir -p "$DAGGER_TMP_BINDIR"
+              curl "https://dl.dagger.io/dagger/main/${DAGGER_CLI_COMMIT}/dagger_${DAGGER_CLI_COMMIT}_$(uname -s | tr A-Z a-z)_$(uname -m | sed s/x86_64/amd64/).tar.gz" | tar xvz -C "$DAGGER_TMP_BINDIR"
+          fi
+          ./hack/make engine:testrace
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
           _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
+          DAGGER_CLI_COMMIT: "48fb31df3c383da743c9cba5723f4291e0e6f8df"
       - name: "ALWAYS print kernel logs - especialy useful on failure"
         if: always()
         run: sudo dmesg
@@ -113,11 +129,19 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
-      - run: ./hack/make sdk:go:test
+      - run: |
+          DAGGER_TMP_BINDIR="/tmp/dagger_${DAGGER_CLI_COMMIT}"
+          export _EXPERIMENTAL_DAGGER_CLI_BIN="$DAGGER_TMP_BINDIR/dagger"
+          if [ ! -f  "$_EXPERIMENTAL_DAGGER_CLI_BIN" ]; then
+              mkdir -p "$DAGGER_TMP_BINDIR"
+              curl "https://dl.dagger.io/dagger/main/${DAGGER_CLI_COMMIT}/dagger_${DAGGER_CLI_COMMIT}_$(uname -s | tr A-Z a-z)_$(uname -m | sed s/x86_64/amd64/).tar.gz" | tar xvz -C "$DAGGER_TMP_BINDIR"
+          fi
+          ./hack/make sdk:go:test
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
           _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
+          DAGGER_CLI_COMMIT: "48fb31df3c383da743c9cba5723f4291e0e6f8df"
       - uses: actions/upload-artifact@v3
         if: always()
         name: "Upload journal.log"
@@ -134,11 +158,19 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
-      - run: ./hack/make sdk:python:test
+      - run: |
+          DAGGER_TMP_BINDIR="/tmp/dagger_${DAGGER_CLI_COMMIT}"
+          export _EXPERIMENTAL_DAGGER_CLI_BIN="$DAGGER_TMP_BINDIR/dagger"
+          if [ ! -f  "$_EXPERIMENTAL_DAGGER_CLI_BIN" ]; then
+              mkdir -p "$DAGGER_TMP_BINDIR"
+              curl "https://dl.dagger.io/dagger/main/${DAGGER_CLI_COMMIT}/dagger_${DAGGER_CLI_COMMIT}_$(uname -s | tr A-Z a-z)_$(uname -m | sed s/x86_64/amd64/).tar.gz" | tar xvz -C "$DAGGER_TMP_BINDIR"
+          fi
+          ./hack/make sdk:python:test
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
           _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
+          DAGGER_CLI_COMMIT: "48fb31df3c383da743c9cba5723f4291e0e6f8df"
       - uses: actions/upload-artifact@v3
         if: always()
         name: "Upload journal.log"
@@ -155,11 +187,19 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
-      - run: ./hack/make sdk:nodejs:test
+      - run: |
+          DAGGER_TMP_BINDIR="/tmp/dagger_${DAGGER_CLI_COMMIT}"
+          export _EXPERIMENTAL_DAGGER_CLI_BIN="$DAGGER_TMP_BINDIR/dagger"
+          if [ ! -f  "$_EXPERIMENTAL_DAGGER_CLI_BIN" ]; then
+              mkdir -p "$DAGGER_TMP_BINDIR"
+              curl "https://dl.dagger.io/dagger/main/${DAGGER_CLI_COMMIT}/dagger_${DAGGER_CLI_COMMIT}_$(uname -s | tr A-Z a-z)_$(uname -m | sed s/x86_64/amd64/).tar.gz" | tar xvz -C "$DAGGER_TMP_BINDIR"
+          fi
+          ./hack/make sdk:nodejs:test
         env:
           _EXPERIMENTAL_DAGGER_JOURNAL: "/tmp/journal.log"
           _EXPERIMENTAL_DAGGER_CLOUD_TOKEN: "p.eyJ1IjogIjFiZjEwMmRjLWYyZmQtNDVhNi1iNzM1LTgxNzI1NGFkZDU2ZiIsICJpZCI6ICIwYzhmMGY2Yy00YjY1LTRhODktYTI0YS0yN2NjNWNhNzNmNTcifQ.Em92UDP-KmcNd80Y-euTS2IrRkIE8qTisP3SXYkQi3c"
           _EXPERIMENTAL_DAGGER_RUNNER_HOST: "unix:///var/run/buildkit/buildkitd.sock"
+          DAGGER_CLI_COMMIT: "48fb31df3c383da743c9cba5723f4291e0e6f8df"
       - uses: actions/upload-artifact@v3
         if: always()
         name: "Upload journal.log"
