@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"dagger.io/dagger"
+	"github.com/moby/buildkit/identity"
 	"golang.org/x/exp/maps"
 )
 
@@ -166,6 +167,8 @@ func CIDevEngineContainer(c *dagger.Client, opts ...DevEngineOpts) *dagger.Conta
 	} else {
 		cacheVolumeName = "dagger-dev-engine-state"
 	}
+
+	cacheVolumeName = cacheVolumeName + identity.NewID()
 
 	devEngine := devEngineContainer(c, runtime.GOARCH, engineOpts...)
 
