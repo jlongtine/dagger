@@ -21,6 +21,11 @@ jobs:
   engine:
     runs-on: self-hosted
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: "Set up QEMU"
         run: |
           docker run --rm --privileged tonistiigi/binfmt:latest --install all
@@ -91,6 +96,11 @@ jobs:
   engine-race-detection:
     runs-on: self-hosted
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/setup-go@v3
         with:
           go-version: "1.20"
@@ -125,6 +135,11 @@ jobs:
     name: "sdk / go"
     runs-on: self-hosted
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
@@ -154,6 +169,11 @@ jobs:
     name: "sdk / python"
     runs-on: self-hosted
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
@@ -183,6 +203,11 @@ jobs:
     name: "sdk / nodejs"
     runs-on: self-hosted
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
