@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   engine:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -39,7 +39,7 @@ jobs:
           path: /tmp/journal.log
 
   docs:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -59,7 +59,7 @@ jobs:
 
   sdk-go:
     name: "sdk / go"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -79,7 +79,7 @@ jobs:
 
   sdk-python:
     name: "sdk / python"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -99,7 +99,7 @@ jobs:
 
   sdk-nodejs:
     name: "sdk / nodejs"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
