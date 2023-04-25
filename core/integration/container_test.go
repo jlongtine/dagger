@@ -3128,6 +3128,7 @@ func TestContainerInsecureRootCapabilitesWithService(t *testing.T) {
 	// testing it can startup, create containers and bind mount from its filesystem to
 	// them.
 	dockerd := c.Container().From("docker:23.0.1-dind").
+		WithMountedDirectory("/root/.docker", c.Host().Directory("/root/.docker")).
 		WithMountedCache("/var/lib/docker", c.CacheVolume("docker-lib"), dagger.ContainerWithMountedCacheOpts{
 			Sharing: dagger.Private,
 		}).
