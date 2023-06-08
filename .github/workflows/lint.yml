@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   engine:
-    runs-on: self-hosted
+    runs-on: dagger-runner
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -39,7 +39,7 @@ jobs:
           path: /tmp/journal.log
 
   docs:
-    runs-on: self-hosted
+    runs-on: dagger-runner
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -59,7 +59,7 @@ jobs:
 
   sdk-go:
     name: "sdk / go"
-    runs-on: self-hosted
+    runs-on: dagger-runner
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -79,7 +79,7 @@ jobs:
 
   sdk-python:
     name: "sdk / python"
-    runs-on: self-hosted
+    runs-on: dagger-runner
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -99,7 +99,7 @@ jobs:
 
   sdk-nodejs:
     name: "sdk / nodejs"
-    runs-on: self-hosted
+    runs-on: dagger-runner
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -119,7 +119,7 @@ jobs:
 
   sdk-rust:
     name: "sdk / rust"
-    runs-on: ubuntu-22.04-16c-64g-600gb
+    runs-on: dagger-runner
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
