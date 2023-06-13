@@ -145,7 +145,7 @@ jobs:
 
   sdk-elixir:
     name: "sdk / elixir"
-    runs-on: ubuntu-22.04-16c-64g-600gb
+    runs-on: dagger-runner
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
